@@ -1,174 +1,238 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Trivial Online</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(120deg, #1e3c72, #2a5298);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .game {
-            background: rgba(0,0,0,0.7);
-            padding: 30px;
-            border-radius: 15px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 0 20px black;
-        }
-
-        h1 {
-            margin-bottom: 10px;
-        }
-
-        .question {
-            font-size: 18px;
-            margin: 20px 0;
-        }
-
-        .answers button {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .answers button:hover {
-            opacity: 0.8;
-        }
-
-        .correct {
-            background: #2ecc71;
-        }
-
-        .wrong {
-            background: #e74c3c;
-        }
-
-        .score {
-            margin-top: 15px;
-        }
-
-        #nextBtn {
-            margin-top: 15px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            background: #f1c40f;
-            font-size: 16px;
-            cursor: pointer;
-            display: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Action Heroes Rank PRO</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background:#0f0f0f;
+    color:white;
+    margin:0;
+}
+header {
+    background:#e50914;
+    padding:15px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+.filters {
+    text-align:center;
+    padding:10px;
+}
+.filters button {
+    margin:5px;
+    padding:8px 15px;
+    border:none;
+    border-radius:20px;
+    background:#333;
+    color:white;
+    cursor:pointer;
+}
+.filters button.active {
+    background:#e50914;
+}
+.container {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+    gap:20px;
+    padding:20px;
+}
+.card {
+    background:#1c1c1c;
+    border-radius:12px;
+    padding:15px;
+    text-align:center;
+    cursor:pointer;
+    transition:0.2s;
+}
+.card:hover {
+    transform:scale(1.05);
+}
+.card img {
+    width:100%;
+    border-radius:10px;
+}
+.stars span {
+    font-size:20px;
+    cursor:pointer;
+    color:gray;
+}
+.stars .active {
+    color:gold;
+}
+.modal {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.8);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+.modal-content {
+    background:#1c1c1c;
+    padding:20px;
+    border-radius:12px;
+    width:300px;
+    text-align:center;
+}
+.modal img {
+    width:100%;
+    border-radius:10px;
+}
+.close {
+    color:#e50914;
+    cursor:pointer;
+    float:right;
+    font-size:20px;
+}
+</style>
 </head>
 <body>
 
-<div class="game">
-    <h1>🎯 Trivial Online</h1>
-    <div class="question" id="question"></div>
-    <div class="answers" id="answers"></div>
-    <button id="nextBtn" onclick="nextQuestion()">Siguiente</button>
-    <div class="score" id="score"></div>
+<header>🔥 Action Heroes Rank PRO</header>
+
+<div class="filters">
+    <button onclick="setFilter('all')" class="active">Todos</button>
+    <button onclick="setFilter('shooters')">Disparos</button>
+    <button onclick="setFilter('martial')">Artes Marciales</button>
+    <button onclick="setFilter('scifi')">Ciencia Ficción</button>
+</div>
+
+<div class="container" id="heroes"></div>
+
+<div class="modal" id="modal">
+    <div class="modal-content" id="modalContent"></div>
 </div>
 
 <script>
-const questions = [
-    {
-        question: "¿En qué año se descubrió América?",
-        answers: ["1492", "1500", "1453", "1600"],
-        correct: 0
-    },
-    {
-        question: "¿Quién ganó el Mundial 2010?",
-        answers: ["Brasil", "Alemania", "España", "Argentina"],
-        correct: 2
-    },
-    {
-        question: "¿Capital de Francia?",
-        answers: ["Roma", "París", "Londres", "Berlín"],
-        correct: 1
-    },
-    {
-        question: "¿Cuántos jugadores hay en un equipo de fútbol?",
-        answers: ["9", "10", "11", "12"],
-        correct: 2
-    },
-    {
-        question: "¿Cuál es el planeta más grande?",
-        answers: ["Marte", "Tierra", "Júpiter", "Saturno"],
-        correct: 2
-    }
+const heroes = [
+{
+ name:"Rambo",
+ category:"shooters",
+ img:"https://upload.wikimedia.org/wikipedia/en/5/5d/Rambo_First_Blood_Part_II.jpg",
+ info:"Veterano de Vietnam experto en supervivencia.",
+ movies:"First Blood, Rambo II, Rambo III"
+},
+{
+ name:"John Wick",
+ category:"shooters",
+ img:"https://upload.wikimedia.org/wikipedia/en/9/98/John_Wick_TeaserPoster.jpg",
+ info:"Asesino legendario conocido como Baba Yaga.",
+ movies:"John Wick 1-4"
+},
+{
+ name:"Terminator T-800",
+ category:"scifi",
+ img:"https://upload.wikimedia.org/wikipedia/en/7/7f/Terminator2poster.jpg",
+ info:"Cyborg del futuro con fuerza extrema.",
+ movies:"Terminator 1-6"
+},
+{
+ name:"Neo",
+ category:"scifi",
+ img:"https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg",
+ info:"El elegido dentro de Matrix.",
+ movies:"Matrix Trilogy"
+},
+{
+ name:"Bruce Lee",
+ category:"martial",
+ img:"https://upload.wikimedia.org/wikipedia/en/3/3c/Enter_the_Dragon_poster.jpg",
+ info:"Maestro absoluto de artes marciales.",
+ movies:"Enter the Dragon"
+},
+{
+ name:"Ip Man",
+ category:"martial",
+ img:"https://upload.wikimedia.org/wikipedia/en/4/4c/Ip_Man_poster.jpg",
+ info:"Gran maestro de Wing Chun.",
+ movies:"Ip Man 1-4"
+},
+{
+ name:"Rocky Balboa",
+ category:"martial",
+ img:"https://upload.wikimedia.org/wikipedia/en/1/18/Rocky_poster.jpg",
+ info:"Boxeador legendario de Filadelfia.",
+ movies:"Rocky Saga"
+},
+{
+ name:"Predator",
+ category:"scifi",
+ img:"https://upload.wikimedia.org/wikipedia/en/3/3c/Predator_Movie.jpg",
+ info:"Cazador alienígena letal.",
+ movies:"Predator 1-5"
+}
 ];
 
-let current = 0;
-let score = 0;
+let ratings = JSON.parse(localStorage.getItem("ratings")) || {};
+let filter = "all";
 
-function loadQuestion() {
-    document.getElementById("nextBtn").style.display = "none";
-    const q = questions[current];
-    document.getElementById("question").textContent = q.question;
+function renderHeroes(){
+    const container = document.getElementById("heroes");
+    container.innerHTML = "";
 
-    const answersDiv = document.getElementById("answers");
-    answersDiv.innerHTML = "";
+    let filtered = heroes.filter(h => 
+        filter==="all" || h.category===filter
+    );
 
-    q.answers.forEach((answer, index) => {
-        const btn = document.createElement("button");
-        btn.textContent = answer;
-        btn.onclick = () => checkAnswer(index, btn);
-        answersDiv.appendChild(btn);
+    filtered.sort((a,b)=>
+        (ratings[b.name]||0)-(ratings[a.name]||0)
+    );
+
+    filtered.forEach(hero=>{
+        const rating = ratings[hero.name] || 0;
+
+        container.innerHTML += `
+        <div class="card" onclick="openModal('${hero.name}')">
+            <img src="${hero.img}">
+            <h3>${hero.name}</h3>
+            <div class="stars" onclick="event.stopPropagation()">
+                ${[1,2,3,4,5].map(i=>`
+                    <span onclick="rateHero('${hero.name}',${i})"
+                    class="${i<=rating?'active':''}">★</span>
+                `).join("")}
+            </div>
+            <p>${rating}/5</p>
+        </div>
+        `;
     });
-
-    document.getElementById("score").textContent = 
-        `Pregunta ${current + 1} / ${questions.length} | Puntos: ${score}`;
 }
 
-function checkAnswer(index, button) {
-    const correctIndex = questions[current].correct;
-    const buttons = document.querySelectorAll(".answers button");
-
-    buttons.forEach(btn => btn.disabled = true);
-
-    if (index === correctIndex) {
-        button.classList.add("correct");
-        score++;
-    } else {
-        button.classList.add("wrong");
-        buttons[correctIndex].classList.add("correct");
-    }
-
-    document.getElementById("nextBtn").style.display = "inline-block";
+function rateHero(name,value){
+    ratings[name] = value;
+    localStorage.setItem("ratings", JSON.stringify(ratings));
+    renderHeroes();
 }
 
-function nextQuestion() {
-    current++;
-    if (current < questions.length) {
-        loadQuestion();
-    } else {
-        showResult();
-    }
+function setFilter(f){
+    filter = f;
+    document.querySelectorAll(".filters button")
+        .forEach(b=>b.classList.remove("active"));
+    event.target.classList.add("active");
+    renderHeroes();
 }
 
-function showResult() {
-    document.querySelector(".game").innerHTML = `
-        <h1>🏁 Fin del juego</h1>
-        <p>Has conseguido <strong>${score}</strong> de ${questions.length} puntos.</p>
-        <button onclick="location.reload()">Jugar otra vez</button>
+function openModal(name){
+    const hero = heroes.find(h=>h.name===name);
+    document.getElementById("modalContent").innerHTML = `
+        <span class="close" onclick="closeModal()">✖</span>
+        <img src="${hero.img}">
+        <h2>${hero.name}</h2>
+        <p>${hero.info}</p>
+        <p><strong>Películas:</strong> ${hero.movies}</p>
+        <p><strong>Puntuación:</strong> ${ratings[name]||0}/5</p>
     `;
+    document.getElementById("modal").style.display="flex";
 }
 
-loadQuestion();
-</script>
+function closeModal(){
+    document.getElementById("modal").style.display="none";
+}
 
+renderHeroes();
+</script>
 </body>
 </html>
