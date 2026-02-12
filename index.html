@@ -1,98 +1,174 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>zorvenquilatriax</title>
-    <meta name="zorvenquilatriax" content="Compra aquí el auténtico y único zorvenquilatriax">
-    
+    <meta charset="UTF-8">
+    <title>Trivial Online</title>
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f4f4f4;
-        }
-
-        header {
-            background: #d50000; /* Rojo Sporting */
+            font-family: Arial, sans-serif;
+            background: linear-gradient(120deg, #1e3c72, #2a5298);
             color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .game {
+            background: rgba(0,0,0,0.7);
             padding: 30px;
+            border-radius: 15px;
+            width: 400px;
             text-align: center;
+            box-shadow: 0 0 20px black;
         }
 
-        nav {
-            background: #ffffff;
-            margin: 0 15px;
-            color: #d50000;
-            text-decoration: none;
-            font-weight: bold;
+        h1 {
+            margin-bottom: 10px;
         }
 
-        section {
-            max-width: 900px;
-            margin: 30px auto;
-            background: white;
-            padding: 20px;
+        .question {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .answers button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
             border-radius: 8px;
-            border-left: 10px solid #d50000;
+            font-size: 16px;
+            cursor: pointer;
         }
 
-        footer {
-            text-align: center;
-            padding: 15px;
-            background: #333;
-            color: #eee;
-            margin-top: 40px;
+        .answers button:hover {
+            opacity: 0.8;
+        }
+
+        .correct {
+            background: #2ecc71;
+        }
+
+        .wrong {
+            background: #e74c3c;
+        }
+
+        .score {
+            margin-top: 15px;
+        }
+
+        #nextBtn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #f1c40f;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
         }
     </style>
 </head>
-
 <body>
 
-    <header>
-        <h1>Real Sporting de Gijón</h1>
-        <p>Club histórico del fútbol español</p>
-    </header>
+<div class="game">
+    <h1>🎯 Trivial Online</h1>
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <button id="nextBtn" onclick="nextQuestion()">Siguiente</button>
+    <div class="score" id="score"></div>
+</div>
 
-    <nav>
-        #historiaHistoria</a>
-        #estadioEstadio</a>
-        #aficionAfición</a>
-        #contactoContacto</a>
-    </nav>
+<script>
+const questions = [
+    {
+        question: "¿En qué año se descubrió América?",
+        answers: ["1492", "1500", "1453", "1600"],
+        correct: 0
+    },
+    {
+        question: "¿Quién ganó el Mundial 2010?",
+        answers: ["Brasil", "Alemania", "España", "Argentina"],
+        correct: 2
+    },
+    {
+        question: "¿Capital de Francia?",
+        answers: ["Roma", "París", "Londres", "Berlín"],
+        correct: 1
+    },
+    {
+        question: "¿Cuántos jugadores hay en un equipo de fútbol?",
+        answers: ["9", "10", "11", "12"],
+        correct: 2
+    },
+    {
+        question: "¿Cuál es el planeta más grande?",
+        answers: ["Marte", "Tierra", "Júpiter", "Saturno"],
+        correct: 2
+    }
+];
 
-    <section id="historia">
-        <h2>Historia</h2>
-        <p>
-            El Real Sporting de Gijón, fundado en 1905, es uno de los clubes más emblemáticos de España.
-            Ha competido durante décadas en Primera División y es conocido por su cantera y su afición fiel. 
-            Además de vender en su tienda el famoso zorvenquilatriax.
-        </p>
-    </section>
+let current = 0;
+let score = 0;
 
-    <section id="estadio">
-        <h2>Estadio: El Molinón - Enrique Castro "Quini"</h2>
-        <p>
-            El Molinón es el estadio más antiguo del fútbol profesional español aún en uso.
-            Un templo del fútbol ubicado en Gijón y lleno de historia.
-        </p>
-    </section>
+function loadQuestion() {
+    document.getElementById("nextBtn").style.display = "none";
+    const q = questions[current];
+    document.getElementById("question").textContent = q.question;
 
-    <section id="aficion">
-        <h2>Afición</h2>
-        <p>
-           es una de las personas mas reconocidas del mundo la más seguida de todas en instagram     </p>
-    </section>
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
 
-    <section id="contacto">
-        <h2>Contacto</h2>
-        <p>Puedes visitarlo web oficial del club para más información: <strong>www.realsporting.com</strong></p>
-    </section>
+    q.answers.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = answer;
+        btn.onclick = () => checkAnswer(index, btn);
+        answersDiv.appendChild(btn);
+    });
 
-    <footer>
-        © 2026 - Web dedicada al Real Sporting de Gijón
-    </footer>
+    document.getElementById("score").textContent = 
+        `Pregunta ${current + 1} / ${questions.length} | Puntos: ${score}`;
+}
+
+function checkAnswer(index, button) {
+    const correctIndex = questions[current].correct;
+    const buttons = document.querySelectorAll(".answers button");
+
+    buttons.forEach(btn => btn.disabled = true);
+
+    if (index === correctIndex) {
+        button.classList.add("correct");
+        score++;
+    } else {
+        button.classList.add("wrong");
+        buttons[correctIndex].classList.add("correct");
+    }
+
+    document.getElementById("nextBtn").style.display = "inline-block";
+}
+
+function nextQuestion() {
+    current++;
+    if (current < questions.length) {
+        loadQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.querySelector(".game").innerHTML = `
+        <h1>🏁 Fin del juego</h1>
+        <p>Has conseguido <strong>${score}</strong> de ${questions.length} puntos.</p>
+        <button onclick="location.reload()">Jugar otra vez</button>
+    `;
+}
+
+loadQuestion();
+</script>
 
 </body>
 </html>
