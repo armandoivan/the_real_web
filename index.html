@@ -144,29 +144,92 @@
 
 <script>
     // --- BANCO DE PREGUNTAS (Estructura expandible) ---
-    const DB = {
-        deportes: {
-            facil: [
-                {q: "¿Cuántos jugadores tiene un equipo de fútbol?", a: ["11", "10", "12", "9"], c: 0},
-                {q: "¿Qué deporte practica Rafa Nadal?", a: ["Golf", "Tenis", "Fútbol", "Boxeo"], c: 1}
-            ],
-            dificil: [
-                {q: "¿Quién ganó el primer mundial de la historia?", a: ["Brasil", "Uruguay", "Italia", "Argentina"], c: 1},
-                {q: "¿En qué año se celebraron los primeros JJ.OO modernos?", a: ["1896", "1900", "1924", "1888"], c: 0}
-            ]
-        },
-        historia: {
-            facil: [
-                {q: "¿Quién descubrió América?", a: ["Magallanes", "Colón", "Elcano", "Vespucio"], c: 1},
-                {q: "¿Qué país regaló la Estatua de la Libertad a EE.UU?", a: ["Francia", "España", "Italia", "Alemania"], c: 0}
-            ]
-        },
-        ciencia: {
-            medio: [
-                {q: "¿Cuál es el planeta más grande del sistema solar?", a: ["Tierra", "Marte", "Júpiter", "Saturno"], c: 2}
-            ]
-        }
-    };
+const DB = {
+    deportes: {
+        facil: [
+            {q: "¿Cuántos minutos dura un partido de fútbol oficial?", a: ["45", "90", "60", "80"], c: 1},
+            {q: "¿Qué selección ha ganado más Mundiales de fútbol?", a: ["Alemania", "Italia", "Brasil", "Argentina"], c: 2},
+            {q: "¿En qué deporte se usa un 'puck'?", a: ["Baloncesto", "Hockey sobre hielo", "Golf", "Rugby"], c: 1},
+            {q: "¿Cuántos anillos tiene el logo de los Juegos Olímpicos?", a: ["4", "5", "6", "3"], c: 1},
+            {q: "¿Quién es considerado el 'Rey del Baloncesto'?", a: ["Michael Jordan", "Pau Gasol", "Usain Bolt", "Tiger Woods"], c: 0}
+        ],
+        medio: [
+            {q: "¿Cuántos puntos vale un tiro libre en baloncesto?", a: ["1", "2", "3", "0"], c: 0},
+            {q: "¿En qué ciudad se celebraron los JJ.OO. de 1992?", a: ["Madrid", "Sevilla", "Barcelona", "Londres"], c: 2},
+            {q: "¿Cómo se llama el trofeo del campeonato de la NFL?", a: ["Copa Stanley", "Vince Lombardi", "Larry O'Brien", "Copa Davis"], c: 1},
+            {q: "¿Quién tiene más títulos de Grand Slam en tenis masculino?", a: ["Roger Federer", "Novak Djokovic", "Rafael Nadal", "Carlos Alcaraz"], c: 1}
+        ],
+        dificil: [
+            {q: "¿Quién ostenta el récord de más medallas olímpicas de la historia?", a: ["Michael Phelps", "Larisa Latynina", "Usain Bolt", "Carl Lewis"], c: 0},
+            {q: "¿En qué año ganó España su primer Mundial de Fútbol?", a: ["2006", "2010", "2014", "2008"], c: 1},
+            {q: "¿Qué piloto de F1 ha ganado más campeonatos (empatado con Schumacher)?", a: ["Fernando Alonso", "Sebastian Vettel", "Lewis Hamilton", "Max Verstappen"], c: 2}
+        ]
+    },
+    television: {
+        facil: [
+            {q: "¿En qué ciudad viven Los Simpson?", a: ["Shelbyville", "Springfield", "Quahog", "South Park"], c: 1},
+            {q: "¿Cómo se llama el protagonista de 'Breaking Bad'?", a: ["Jesse Pinkman", "Walter White", "Saul Goodman", "Hank Schrader"], c: 1},
+            {q: "¿Cuál es el nombre del bebé en 'Family Guy'?", a: ["Chris", "Meg", "Stewie", "Brian"], c: 2},
+            {q: "¿En qué serie aparece un Trono de Hierro?", a: ["The Witcher", "Vikingos", "Juego de Tronos", "El Señor de los Anillos"], c: 2}
+        ],
+        medio: [
+            {q: "¿Cómo se llama la cafetería donde se reunían los protagonistas de 'Friends'?", a: ["MacLaren's", "Central Perk", "The Cheesecake Factory", "Monk's"], c: 1},
+            {q: "¿En 'Stranger Things', cómo se llama la dimensión paralela?", a: ["El Vacío", "El Mundo del Revés", "El Abismo", "La Dimensión X"], c: 1},
+            {q: "¿Quién es 'El Profesor' en 'La Casa de Papel'?", a: ["Berlín", "Sergio Marquina", "Andrés de Fonollosa", "Tokio"], c: 1}
+        ],
+        dificil: [
+            {q: "¿En qué año se emitió el primer episodio de 'Doctor Who'?", a: ["1963", "1975", "1955", "1980"], c: 0},
+            {q: "¿Cómo se llama el planeta de origen de Alf?", a: ["Melmac", "Krypton", "Vulcano", "Marte"], c: 0},
+            {q: "¿Qué serie de TV tiene el récord de más premios Emmy ganados?", a: ["Mad Men", "Breaking Bad", "Saturday Night Live", "Frasier"], c: 2}
+        ]
+    },
+    historia: {
+        facil: [
+            {q: "¿Quién fue el primer presidente de los Estados Unidos?", a: ["Lincoln", "Washington", "Jefferson", "Franklin"], c: 1},
+            {q: "¿Qué civilización construyó las pirámides de Giza?", a: ["Mayas", "Incas", "Egipcios", "Romanos"], c: 2},
+            {q: "¿En qué país nació Adolf Hitler?", a: ["Alemania", "Austria", "Polonia", "Hungría"], c: 1}
+        ],
+        medio: [
+            {q: "¿En qué año comenzó la Segunda Guerra Mundial?", a: ["1914", "1939", "1945", "1929"], c: 1},
+            {q: "¿Quién fue la última reina de Egipto?", a: ["Nefertiti", "Cleopatra VII", "Hatshepsut", "Isis"], c: 1},
+            {q: "¿Qué muro cayó en 1989 simbolizando el fin de la Guerra Fría?", a: ["Muro de Adriano", "Muralla China", "Muro de Berlín", "Muro de Gaza"], c: 2}
+        ],
+        dificil: [
+            {q: "¿Cómo se llamaba el caballo de Alejandro Magno?", a: ["Rocinante", "Bucéfalo", "Babieca", "Pegaso"], c: 1},
+            {q: "¿Qué tratado puso fin a la Primera Guerra Mundial?", a: ["Tratado de Tordesillas", "Tratado de Versalles", "Pacto de Varsovia", "Paz de Westfalia"], c: 1}
+        ]
+    },
+    ciencia: {
+        facil: [
+            {q: "¿Cuál es el planeta más cercano al Sol?", a: ["Venus", "Marte", "Mercurio", "Tierra"], c: 2},
+            {q: "¿Qué gas respiramos los humanos para vivir?", a: ["Nitrógeno", "Dióxido de carbono", "Oxígeno", "Helio"], c: 2},
+            {q: "¿Cuál es el animal más grande del mundo?", a: ["Elefante", "Ballena Azul", "Tiburón Ballena", "Dinosaurio"], c: 1}
+        ],
+        medio: [
+            {q: "¿Cuál es el símbolo químico del Oro?", a: ["Ag", "Fe", "Au", "Pb"], c: 2},
+            {q: "¿Quién formuló la teoría de la relatividad?", a: ["Newton", "Einstein", "Darwin", "Tesla"], c: 1},
+            {q: "¿Cuántos huesos tiene el cuerpo humano adulto?", a: ["206", "215", "190", "250"], c: 0}
+        ],
+        dificil: [
+            {q: "¿Cuál es la velocidad de la luz aprox?", a: ["300.000 km/s", "150.000 km/s", "1.000.000 km/s", "500.000 km/s"], c: 0},
+            {q: "¿Qué partícula tiene carga eléctrica negativa?", a: ["Protón", "Neutrón", "Electrón", "Quark"], c: 2}
+        ]
+    },
+    arte: {
+        facil: [
+            {q: "¿Quién pintó la 'Mona Lisa'?", a: ["Van Gogh", "Da Vinci", "Picasso", "Miguel Ángel"], c: 1},
+            {q: "¿En qué ciudad se encuentra el museo del Louvre?", a: ["Roma", "Londres", "París", "Madrid"], c: 2}
+        ],
+        medio: [
+            {q: "¿Quién pintó 'La persistencia de la memoria' (relojes derretidos)?", a: ["Miró", "Dalí", "Magritte", "Warhol"], c: 1},
+            {q: "¿Qué artista se cortó la oreja?", a: ["Vincent van Gogh", "Claude Monet", "Paul Gauguin", "Edvard Munch"], c: 0}
+        ],
+        dificil: [
+            {q: "¿Cuál es la técnica pictórica de 'Seurat' basada en puntos?", a: ["Cubismo", "Fovismo", "Puntillismo", "Impresionismo"], c: 2},
+            {q: "¿Quién esculpió el 'Éxtasis de Santa Teresa'?", a: ["Donatello", "Bernini", "Canova", "Rodin"], c: 1}
+        ]
+    }
+};
 
     // Estado del juego
     let currentQuestions = [];
@@ -275,3 +338,4 @@
 </script>
 </body>
 </html>
+
