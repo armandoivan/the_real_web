@@ -2,164 +2,276 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Simulador Mundial 2026 - Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Quiz Pro 2026</title>
     <style>
-        :root { --primary: #004b93; --accent: #e30613; --bg: #f4f7f6; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        header { text-align: center; background: var(--primary); color: white; padding: 1rem; border-radius: 10px; margin-bottom: 20px; }
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f172a;
+            color: var(--light);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #1e293b;
+            width: 95%;
+            max-width: 700px;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .hidden { display: none; }
+
+        /* Pantalla de Inicio */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+        select, button {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        select { background: #334155; color: white; width: 100%; }
+
+        .btn-start {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            font-weight: bold;
+            grid-column: span 2;
+            margin-top: 1rem;
+        }
+
+        /* Quiz UI */
+        .header-quiz { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+        .stats-bar { font-size: 0.9rem; color: #94a3b8; }
         
-        .grid-grupos { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 20px; 
-        }
-
-        .card-grupo { 
-            background: white; border-radius: 12px; padding: 15px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-
-        .partido { 
-            display: flex; align-items: center; justify-content: space-between; 
-            margin-bottom: 10px; padding: 5px; border-bottom: 1px solid #eee;
-        }
-
-        .equipo-info { display: flex; align-items: center; gap: 10px; width: 40%; }
-        .bandera { width: 25px; height: 18px; object-fit: cover; border: 1px solid #ddd; }
+        .question-card h2 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+        .options-grid { display: grid; gap: 0.8rem; }
         
-        input[type="number"] { 
-            width: 40px; padding: 5px; text-align: center; border: 1px solid #ccc; border-radius: 4px; 
+        .opt-btn {
+            background: #334155;
+            color: white;
+            text-align: left;
+            transition: 0.3s;
         }
+        .opt-btn:hover { background: #475569; }
+        .opt-btn.correct { background: var(--success) !important; }
+        .opt-btn.wrong { background: var(--error) !important; }
 
-        .controles { text-align: center; margin: 40px 0; }
-        button { 
-            padding: 15px 30px; font-size: 1.1rem; cursor: pointer; border: none; 
-            border-radius: 8px; background: var(--accent); color: white; font-weight: bold;
+        /* Historial */
+        .history-table {
+            width: 100%;
+            margin-top: 2rem;
+            border-collapse: collapse;
+            font-size: 0.8rem;
         }
+        .history-table th { border-bottom: 1px solid #475569; padding: 10px; text-align: left; }
+        .history-table td { padding: 10px; border-bottom: 1px solid #334155; }
 
-        #fase-final { 
-            margin-top: 50px; display: none; background: white; padding: 20px; border-radius: 12px;
-        }
-
-        .bracket-step { margin-bottom: 30px; }
-        .match-final { border: 2px solid var(--primary); margin: 10px auto; max-width: 400px; padding: 10px; border-radius: 8px; }
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; text-transform: uppercase; }
+        .tag-easy { background: #22c55e33; color: #4ade80; }
+        .tag-hard { background: #ef444433; color: #f87171; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>🏆 Simulador Interactivo 2026</h1>
-    <p>Ingresa los resultados de cada grupo</p>
-</header>
+<div class="container">
+    <div id="view-menu">
+        <h1>🧠 Mega Quiz 2026</h1>
+        <p>Selecciona tu desafío:</p>
+        
+        <div class="menu-grid">
+            <div>
+                <label>Categoría</label>
+                <select id="sel-category">
+                    <option value="deportes">⚽ Deportes</option>
+                    <option value="historia">📜 Historia</option>
+                    <option value="ciencia">🧪 Ciencia</option>
+                    <option value="television">📺 Televisión</option>
+                </select>
+            </div>
+            <div>
+                <label>Dificultad</label>
+                <select id="sel-difficulty">
+                    <option value="facil">Fácil</option>
+                    <option value="medio">Intermedio</option>
+                    <option value="dificil">Difícil</option>
+                </select>
+            </div>
+            <button class="btn-start" onclick="startQuiz()">EMPEZAR JUEGO</button>
+        </div>
 
-<div class="grid-grupos" id="contenedor-grupos"></div>
+        <div id="history-section">
+            <h3>Últimos Intentos</h3>
+            <table class="history-table">
+                <thead><tr><th>Fecha</th><th>Tema</th><th>Puntos</th></tr></thead>
+                <tbody id="history-body"></tbody>
+            </table>
+        </div>
+    </div>
 
-<div class="controles">
-    <button onclick="procesarFaseGrupos()">Calcular Clasificados y Fase Final</button>
+    <div id="view-quiz" class="hidden">
+        <div class="header-quiz">
+            <span id="quiz-info" class="stats-bar"></span>
+            <span id="quiz-score" class="stats-bar">Puntos: 0</span>
+        </div>
+        <div class="question-card">
+            <h2 id="q-text">Pregunta</h2>
+            <div id="options-box" class="options-grid"></div>
+        </div>
+    </div>
+
+    <div id="view-results" class="hidden" style="text-align:center">
+        <h2 id="res-title">¡Buen trabajo!</h2>
+        <p style="font-size: 3rem" id="res-score">0/0</p>
+        <button onclick="location.reload()" class="btn-start">Volver al Menú</button>
+    </div>
 </div>
 
-<section id="fase-final">
-    <h2 style="text-align: center; color: var(--primary);">⚔️ Fase de Eliminación Directa</h2>
-    <div id="bracket-content"></div>
-</section>
-
 <script>
-    // Configuración de equipos (Nombre, Código de bandera ISO 3166-1 alpha-2)
-    const grupos = {
-        "A": [{n: "México", c: "mx"}, {n: "Sudáfrica", c: "za"}, {n: "Corea del Sur", c: "kr"}, {n: "Noruega", c: "no"}],
-        "B": [{n: "Canadá", c: "ca"}, {n: "Marruecos", c: "ma"}, {n: "Irlanda", c: "ie"}, {n: "Nueva Zelanda", c: "nz"}],
-        "C": [{n: "EE.UU.", c: "us"}, {n: "Paraguay", c: "py"}, {n: "Egipto", c: "eg"}, {n: "Grecia", c: "gr"}],
-        "D": [{n: "Brasil", c: "br"}, {n: "Turquía", c: "tr"}, {n: "Honduras", c: "hn"}, {n: "Costa de Marfil", c: "ci"}],
-        "E": [{n: "Argentina", c: "ar"}, {n: "Austria", c: "at"}, {n: "Argelia", c: "dz"}, {n: "Jordania", c: "jo"}],
-        "F": [{n: "Francia", c: "fr"}, {n: "Colombia", c: "co"}, {n: "Ecuador", c: "ec"}, {n: "Irak", c: "iq"}],
-        "G": [{n: "España", c: "es"}, {n: "Japón", c: "jp"}, {n: "Nigeria", c: "ng"}, {n: "Panamá", c: "pa"}],
-        "H": [{n: "Inglaterra", c: "gb"}, {n: "Uruguay", c: "uy"}, {n: "Australia", c: "au"}, {n: "Jamaica", c: "jm"}],
-        "I": [{n: "Portugal", c: "pt"}, {n: "Bélgica", c: "be"}, {n: "Chile", c: "cl"}, {n: "Arabia Saudita", c: "sa"}],
-        "J": ["Países Bajos", "Perú", "Senegal", "Uzbekistán"].map(n=>({n:n, c:"un"})), // un = default
-        "K": [{n: "Alemania", c: "de"}, {n: "Suiza", c: "ch"}, {n: "Irán", c: "ir"}, {n: "Camerún", c: "cm"}],
-        "L": [{n: "Croacia", c: "hr"}, {n: "Dinamarca", c: "dk"}, {n: "Túnez", c: "tn"}, {n: "Costa Rica", c: "cr"}]
+    // --- BANCO DE PREGUNTAS (Estructura expandible) ---
+    const DB = {
+        deportes: {
+            facil: [
+                {q: "¿Cuántos jugadores tiene un equipo de fútbol?", a: ["11", "10", "12", "9"], c: 0},
+                {q: "¿Qué deporte practica Rafa Nadal?", a: ["Golf", "Tenis", "Fútbol", "Boxeo"], c: 1}
+            ],
+            dificil: [
+                {q: "¿Quién ganó el primer mundial de la historia?", a: ["Brasil", "Uruguay", "Italia", "Argentina"], c: 1},
+                {q: "¿En qué año se celebraron los primeros JJ.OO modernos?", a: ["1896", "1900", "1924", "1888"], c: 0}
+            ]
+        },
+        historia: {
+            facil: [
+                {q: "¿Quién descubrió América?", a: ["Magallanes", "Colón", "Elcano", "Vespucio"], c: 1},
+                {q: "¿Qué país regaló la Estatua de la Libertad a EE.UU?", a: ["Francia", "España", "Italia", "Alemania"], c: 0}
+            ]
+        },
+        ciencia: {
+            medio: [
+                {q: "¿Cuál es el planeta más grande del sistema solar?", a: ["Tierra", "Marte", "Júpiter", "Saturno"], c: 2}
+            ]
+        }
     };
 
-    function crearInterfaz() {
-        const cont = document.getElementById('contenedor-grupos');
-        for (const [letra, equipos] of Object.entries(grupos)) {
-            let div = document.createElement('div');
-            div.className = 'card-grupo';
-            div.innerHTML = `<h3>Grupo ${letra}</h3>`;
-            
-            // Simplificado: 3 partidos representativos por grupo para el simulador
-            const p1 = [equipos[0], equipos[1]];
-            const p2 = [equipos[2], equipos[3]];
-            
-            [p1, p2].forEach((par, idx) => {
-                div.innerHTML += `
-                    <div class="partido">
-                        <div class="equipo-info">
-                            <img class="bandera" src="https://flagcdn.com/w40/${par[0].c}.png">
-                            <span>${par[0].n}</span>
-                        </div>
-                        <input type="number" id="g-${letra}-${idx}-1" value="0">
-                        <span>-</span>
-                        <input type="number" id="g-${letra}-${idx}-2" value="0">
-                        <div class="equipo-info" style="justify-content: flex-end">
-                            <span>${par[1].n}</span>
-                            <img class="bandera" src="https://flagcdn.com/w40/${par[1].c}.png">
-                        </div>
-                    </div>
-                `;
-            });
-            cont.appendChild(div);
-        }
-    }
+    // Estado del juego
+    let currentQuestions = [];
+    let qIndex = 0;
+    let score = 0;
+    let selectedCat = "";
+    let selectedDif = "";
 
-    function procesarFaseGrupos() {
-        let clasificados = [];
-        for (const letra in grupos) {
-            // Lógica simplificada: quien tenga más goles en su partido de prueba avanza
-            const g1 = parseInt(document.getElementById(`g-${letra}-0-1`).value);
-            const g2 = parseInt(document.getElementById(`g-${letra}-0-2`).value);
-            clasificados.push(g1 >= g2 ? grupos[letra][0] : grupos[letra][1]);
+    function startQuiz() {
+        selectedCat = document.getElementById('sel-category').value;
+        selectedDif = document.getElementById('sel-difficulty').value;
+
+        // Verificar si existen preguntas para esa combinación
+        if (!DB[selectedCat] || !DB[selectedCat][selectedDif]) {
+            alert("Esta combinación aún no tiene preguntas. Prueba Deportes/Fácil.");
+            return;
         }
 
-        mostrarFaseFinal(clasificados);
+        // Cargar y mezclar preguntas para que no se repitan
+        currentQuestions = [...DB[selectedCat][selectedDif]].sort(() => Math.random() - 0.5);
+        qIndex = 0;
+        score = 0;
+
+        document.getElementById('view-menu').classList.add('hidden');
+        document.getElementById('view-quiz').classList.remove('hidden');
+        showQuestion();
     }
 
-    function mostrarFaseFinal(clasificados) {
-        const finalSection = document.getElementById('fase-final');
-        const bracket = document.getElementById('bracket-content');
-        finalSection.style.display = 'block';
+    function showQuestion() {
+        const qData = currentQuestions[qIndex];
+        document.getElementById('quiz-info').innerText = `Pregunta ${qIndex + 1} de ${currentQuestions.length} (${selectedCat})`;
+        document.getElementById('q-text').innerText = qData.q;
         
-        let html = '<div class="bracket-step"><h3>Dieciseisavos (Simulados)</h3>';
-        
-        // Simular automáticamente hasta la final
-        let actual = clasificados;
-        let rondaNombre = "Octavos";
-        
-        while(actual.length > 1) {
-            let ganadoresRonda = [];
-            html += `<h4>${rondaNombre}</h4>`;
-            for(let i=0; i < actual.length; i+=2) {
-                if(!actual[i+1]) break;
-                const ganador = Math.random() > 0.5 ? actual[i] : actual[i+1];
-                ganadoresRonda.push(ganador);
-                html += `
-                    <div class="match-final">
-                        <img class="bandera" src="https://flagcdn.com/w40/${actual[i].c}.png"> ${actual[i].n} vs 
-                        ${actual[i+1].n} <img class="bandera" src="https://flagcdn.com/w40/${actual[i+1].c}.png">
-                        <br><b>Ganador: ${ganador.n}</b>
-                    </div>
-                `;
+        const box = document.getElementById('options-box');
+        box.innerHTML = "";
+
+        qData.a.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(i, btn);
+            box.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(idx, btn) {
+        const correct = currentQuestions[qIndex].c;
+        const allBtns = document.querySelectorAll('.opt-btn');
+        allBtns.forEach(b => b.disabled = true);
+
+        if (idx === correct) {
+            btn.classList.add('correct');
+            score++;
+            document.getElementById('quiz-score').innerText = `Puntos: ${score}`;
+        } else {
+            btn.classList.add('wrong');
+            allBtns[correct].classList.add('correct');
+        }
+
+        setTimeout(() => {
+            qIndex++;
+            if (qIndex < currentQuestions.length) {
+                showQuestion();
+            } else {
+                finishQuiz();
             }
-            actual = ganadoresRonda;
-            rondaNombre = actual.length === 2 ? "FINAL" : "Siguiente Ronda";
-        }
-
-        html += `<h2 style="color:gold; text-align:center">🏆 CAMPEÓN: ${actual[0].n} 🏆</h2>`;
-        bracket.innerHTML = html;
-        window.scrollTo(0, document.body.scrollHeight);
+        }, 1500);
     }
 
-    window.onload = crearInterfaz;
+    function finishQuiz() {
+        document.getElementById('view-quiz').classList.add('hidden');
+        document.getElementById('view-results').classList.remove('hidden');
+        document.getElementById('res-score').innerText = `${score} / ${currentQuestions.length}`;
+        
+        saveAttempt();
+    }
+
+    // --- SISTEMA DE PUNTUACIONES (LocalStorage) ---
+    function saveAttempt() {
+        const attempts = JSON.parse(localStorage.getItem('quiz_history') || '[]');
+        const newAttempt = {
+            date: new Date().toLocaleDateString(),
+            cat: selectedCat,
+            dif: selectedDif,
+            score: `${score}/${currentQuestions.length}`
+        };
+        attempts.unshift(newAttempt);
+        localStorage.setItem('quiz_history', JSON.stringify(attempts.slice(0, 5))); // Guardar últimos 5
+        loadHistory();
+    }
+
+    function loadHistory() {
+        const attempts = JSON.parse(localStorage.getItem('quiz_history') || '[]');
+        const body = document.getElementById('history-body');
+        body.innerHTML = attempts.map(a => `
+            <tr>
+                <td>${a.date}</td>
+                <td>${a.cat} <span class="tag tag-${a.dif}">${a.dif}</span></td>
+                <td>${a.score}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Inicializar
+    window.onload = loadHistory;
 </script>
 </body>
 </html>
