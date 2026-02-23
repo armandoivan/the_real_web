@@ -7,7 +7,7 @@
 <style>
 body{
 margin:0;
-font-family:Arial;
+font-family:Arial, Helvetica, sans-serif;
 background:#0f0f0f;
 color:white;
 transition:0.5s;
@@ -42,7 +42,7 @@ background:#e50914;
 
 .container{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
 gap:20px;
 padding:20px;
 }
@@ -54,18 +54,18 @@ padding:15px;
 text-align:center;
 cursor:pointer;
 transition:0.3s;
-overflow:hidden;
-position:relative;
+box-shadow:0 0 10px black;
+}
+
+.card:hover{
+transform:scale(1.05);
 }
 
 .card img{
 width:100%;
+height:260px;
+object-fit:cover;
 border-radius:10px;
-transition:0.3s;
-}
-
-.card:hover img{
-transform:scale(1.1);
 }
 
 .stars span{
@@ -78,26 +78,37 @@ color:gray;
 color:gold;
 }
 
+/* TORNEO */
+
 .bracket{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:20px;
+display:flex;
+justify-content:space-around;
 padding:20px;
 background:#111;
 }
 
 .round{
-background:#1c1c1c;
-padding:10px;
-border-radius:10px;
+width:30%;
 }
 
 .match{
-margin:10px 0;
-padding:5px;
 background:#333;
+margin:10px 0;
+padding:8px;
 border-radius:5px;
 cursor:pointer;
+text-align:center;
+}
+
+.match:hover{
+background:#e50914;
+}
+
+.champion{
+text-align:center;
+font-size:22px;
+padding:15px;
+color:gold;
 }
 </style>
 </head>
@@ -117,57 +128,63 @@ cursor:pointer;
 
 <div class="container" id="heroes"></div>
 
-<h2 style="text-align:center">🏆 Torneo</h2>
+<h2 style="text-align:center">🏆 TORNEO</h2>
 <div class="bracket">
-<div class="round" id="round1"><h3>Cuartos</h3></div>
-<div class="round" id="round2"><h3>Semifinal</h3></div>
-<div class="round" id="round3"><h3>Final</h3></div>
+<div class="round" id="quarter"><h3>Cuartos</h3></div>
+<div class="round" id="semi"><h3>Semifinal</h3></div>
+<div class="round" id="final"><h3>Final</h3></div>
 </div>
-
-<audio id="goodSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
-<audio id="badSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-changing-tab-206.wav"></audio>
+<div class="champion" id="champion"></div>
 
 <script>
+
+/* HEROES CON IMÁGENES REALES DE WIKIMEDIA */
+
 const heroes = [
-{name:"Rambo",section:"cine"},
-{name:"John Wick",section:"cine"},
-{name:"Neo",section:"cine"},
-{name:"Kratos",section:"videojuegos"},
-{name:"Scorpion",section:"videojuegos"},
-{name:"Nathan Drake",section:"videojuegos"},
-{name:"Batman",section:"cine"},
-{name:"The Punisher",section:"series"},
-{name:"Darth Vader",section:"villanos"},
-{name:"Thanos",section:"villanos"},
-{name:"Joker",section:"villanos"},
-{name:"Goku",section:"animacion"},
-{name:"Vegeta",section:"animacion"},
-{name:"Homelander",section:"series"},
-{name:"Geralt",section:"series"},
-{name:"Master Chief",section:"videojuegos"},
-{name:"Solid Snake",section:"videojuegos"},
-{name:"Predator",section:"cine"},
-{name:"Terminator",section:"cine"},
-{name:"Leon Kennedy",section:"videojuegos"},
-{name:"Lara Croft",section:"videojuegos"},
-{name:"Spawn",section:"animacion"},
-{name:"Omni-Man",section:"series"},
-{name:"Sub-Zero",section:"videojuegos"},
-{name:"Deadpool",section:"cine"},
-{name:"Wolverine",section:"cine"},
-{name:"Hulk",section:"cine"},
-{name:"Thor",section:"cine"},
-{name:"Bane",section:"villanos"},
-{name:"Magneto",section:"villanos"},
-{name:"Ahsoka",section:"series"},
-{name:"Mandalorian",section:"series"},
-{name:"Rick Grimes",section:"series"},
-{name:"Optimus Prime",section:"animacion"},
-{name:"Shredder",section:"villanos"}
+{name:"Rambo",section:"cine",img:"https://upload.wikimedia.org/wikipedia/en/5/5d/Rambo_First_Blood_Part_II.jpg"},
+{name:"John Wick",section:"cine",img:"https://upload.wikimedia.org/wikipedia/en/9/98/John_Wick_TeaserPoster.jpg"},
+{name:"Neo",section:"cine",img:"https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg"},
+{name:"Kratos",section:"videojuegos",img:"https://upload.wikimedia.org/wikipedia/en/a/a7/God_of_War_4_cover.jpg"},
+{name:"Scorpion",section:"videojuegos",img:"https://upload.wikimedia.org/wikipedia/en/7/7e/Mortal_Kombat_11_cover_art.png"},
+{name:"Nathan Drake",section:"videojuegos",img:"https://upload.wikimedia.org/wikipedia/en/1/1f/Uncharted_4_box_artwork.jpg"},
+{name:"Darth Vader",section:"villanos",img:"https://upload.wikimedia.org/wikipedia/en/7/76/Darth_Vader.jpg"},
+{name:"Thanos",section:"villanos",img:"https://upload.wikimedia.org/wikipedia/en/7/7b/Thanos_AIW.png"},
+{name:"Joker",section:"villanos",img:"https://upload.wikimedia.org/wikipedia/en/e/e1/Joker_%282019_film%29_poster.jpg"},
+{name:"Goku",section:"animacion",img:"https://upload.wikimedia.org/wikipedia/en/2/2f/Dragon_Ball_Super_Key_visual.jpg"},
+{name:"Homelander",section:"series",img:"https://upload.wikimedia.org/wikipedia/en/1/11/The_Boys_Season_3.jpg"},
+{name:"Geralt",section:"series",img:"https://upload.wikimedia.org/wikipedia/en/1/1e/The_Witcher_Title_Card.png"}
 ];
 
 let ratings = JSON.parse(localStorage.getItem("ratings")) || {};
+let votes = JSON.parse(localStorage.getItem("votes")) || {};
 let section="all";
+
+/* RENDER HEROES */
+
+function renderHeroes(){
+const container=document.getElementById("heroes");
+container.innerHTML="";
+
+heroes
+.filter(h=>section==="all"||h.section===section)
+.forEach(hero=>{
+let avg=getAverage(hero.name);
+
+container.innerHTML+=`
+<div class="card">
+<img src="${hero.img}">
+<h3>${hero.name}</h3>
+<div class="stars">
+${[1,2,3,4,5].map(i=>
+`<span onclick="rateHero('${hero.name}',${i})"
+class="${i<=Math.round(avg)?'active':''}">★</span>`
+).join("")}
+</div>
+<p>⭐ ${avg.toFixed(1)}</p>
+</div>
+`;
+});
+}
 
 function setSection(sec){
 section=sec;
@@ -177,55 +194,78 @@ event.target.classList.add("active");
 renderHeroes();
 }
 
-function renderHeroes(){
-const container=document.getElementById("heroes");
-container.innerHTML="";
-
-heroes
-.filter(h=>section==="all"||h.section===section)
-.forEach(hero=>{
-const rating=ratings[hero.name]||0;
-
-container.innerHTML+=`
-<div class="card">
-<img src="https://api.dicebear.com/7.x/adventurer/svg?seed=${hero.name}">
-<h3>${hero.name}</h3>
-<div class="stars">
-${[1,2,3,4,5].map(i=>
-`<span onclick="rateHero('${hero.name}',${i})"
-class="${i<=rating?'active':''}">★</span>`
-).join("")}
-</div>
-<p>${rating}/5</p>
-</div>
-`;
-});
-}
-
 function rateHero(name,value){
-ratings[name]=value;
+ratings[name]=(ratings[name]||0)+value;
+votes[name]=(votes[name]||0)+1;
 localStorage.setItem("ratings",JSON.stringify(ratings));
-if(value>=4){
-document.getElementById("goodSound").play();
-}else{
-document.getElementById("badSound").play();
-}
+localStorage.setItem("votes",JSON.stringify(votes));
 renderHeroes();
 }
 
-/* -------- TORNEO -------- */
+function getAverage(name){
+if(!ratings[name]) return 0;
+return ratings[name]/votes[name];
+}
 
-function createTournament(){
+/* -------- TORNEO REAL -------- */
+
+let quarterWinners=[];
+let semiWinners=[];
+
+function startTournament(){
 let shuffled=[...heroes].sort(()=>Math.random()-0.5).slice(0,8);
-const r1=document.getElementById("round1");
-r1.innerHTML="<h3>Cuartos</h3>";
-shuffled.forEach(h=>{
-r1.innerHTML+=`<div class="match">${h.name}</div>`;
-});
+let quarter=document.getElementById("quarter");
+quarter.innerHTML="<h3>Cuartos</h3>";
+document.getElementById("semi").innerHTML="<h3>Semifinal</h3>";
+document.getElementById("final").innerHTML="<h3>Final</h3>";
+document.getElementById("champion").innerHTML="";
+quarterWinners=[];
+semiWinners=[];
+
+for(let i=0;i<8;i+=2){
+quarter.innerHTML+=`
+<div class="match" onclick="advance('${shuffled[i].name}','${shuffled[i+1].name}',1)">
+${shuffled[i].name} vs ${shuffled[i+1].name}
+</div>`;
+}
 }
 
-createTournament();
+function advance(h1,h2,round){
+let winner=prompt(`¿Quién gana?\n1) ${h1}\n2) ${h2}`);
+winner = winner==="1"?h1:h2;
+
+if(round===1){
+quarterWinners.push(winner);
+if(quarterWinners.length===4){
+let semi=document.getElementById("semi");
+for(let i=0;i<4;i+=2){
+semi.innerHTML+=`
+<div class="match" onclick="advance('${quarterWinners[i]}','${quarterWinners[i+1]}',2)">
+${quarterWinners[i]} vs ${quarterWinners[i+1]}
+</div>`;
+}
+}
+}
+
+if(round===2){
+semiWinners.push(winner);
+if(semiWinners.length===2){
+let final=document.getElementById("final");
+final.innerHTML+=`
+<div class="match" onclick="advance('${semiWinners[0]}','${semiWinners[1]}',3)">
+${semiWinners[0]} vs ${semiWinners[1]}
+</div>`;
+}
+}
+
+if(round===3){
+document.getElementById("champion").innerHTML="🏆 CAMPEÓN: "+winner;
+}
+}
+
+startTournament();
 renderHeroes();
+
 </script>
 
 </body>
