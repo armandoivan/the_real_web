@@ -1,202 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Mundial 2026 Simulator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Mundial 2026</title>
+    <style>
+        :root {
+            --fifa-red: #e30613;
+            --fifa-blue: #004b93;
+            --dark: #1a1a1a;
+        }
 
-<style>
-body{
-font-family:Arial;
-background:#0b1d3a;
-color:white;
-margin:0;
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: var(--dark);
+        }
 
-h1{
-text-align:center;
-background:#d62828;
-margin:0;
-padding:15px;
-}
+        header {
+            text-align: center;
+            background: var(--fifa-blue);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
 
-.group{
-background:#142850;
-margin:15px;
-padding:15px;
-border-radius:10px;
-}
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
 
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
-}
+        .grid-grupos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
 
-th,td{
-border:1px solid white;
-padding:5px;
-text-align:center;
-}
+        .card-grupo {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--fifa-red);
+        }
 
-input{
-width:40px;
-}
+        h3 { margin-top: 0; color: var(--fifa-blue); border-bottom: 1px solid #ddd; padding-bottom: 5px; }
 
-button{
-background:#f77f00;
-border:none;
-padding:8px;
-margin-top:10px;
-cursor:pointer;
-border-radius:5px;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
 
-button:hover{
-background:#ff9e00;
-}
+        th { text-align: left; color: #666; }
+        td { padding: 8px 0; border-bottom: 1px solid #eee; }
 
-#knockout{
-background:#1b263b;
-margin:15px;
-padding:15px;
-border-radius:10px;
-}
+        .pts { font-weight: bold; color: var(--fifa-red); text-align: right; }
 
-.match{
-margin:10px 0;
-}
-</style>
+        .btn-simular {
+            display: block;
+            width: 250px;
+            margin: 30px auto;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-simular:hover { transform: scale(1.05); background: #218838; }
+
+        .clasificado { color: #28a745; font-weight: bold; }
+        .clasificado::before { content: "• "; }
+    </style>
 </head>
-
 <body>
 
-<h1>🌍 SIMULADOR OFICIAL MUNDIAL 2026</h1>
+<div class="container">
+    <header>
+        <h1>🏆 SIMULADOR WORLD CUP 2026</h1>
+        <p>48 Equipos | 12 Grupos | Formato Oficial</p>
+    </header>
 
-<div id="groups"></div>
+    <button class="btn-simular" onclick="simularTorneo()">⚽ Simular Fase de Grupos</button>
 
-<button onclick="calculateGroups()">Actualizar Clasificación</button>
-
-<div id="knockout"></div>
+    <div id="mundial-grid" class="grid-grupos">
+        </div>
+</div>
 
 <script>
+    // Datos simplificados de los 48 equipos (Basado en proyecciones 2026)
+    const gruposData = {
+        "A": ["México", "Sudáfrica", "Corea del Sur", "Grecia"],
+        "B": ["Canadá", "Irlanda", "Marruecos", "Nueva Zelanda"],
+        "C": ["Estados Unidos", "Paraguay", "Noruega", "Egipto"],
+        "D": ["Brasil", "Turquía", "Honduras", "Costa de Marfil"],
+        "E": ["Argentina", "Austria", "Argelia", "Jordania"],
+        "F": ["Francia", "Colombia", "Ecuador", "Irak"],
+        "G": ["España", "Japón", "Nigeria", "Panamá"],
+        "H": ["Inglaterra", "Uruguay", "Australia", "Jamaica"],
+        "I": ["Portugal", "Bélgica", "Chile", "Arabia Saudita"],
+        "J": ["Países Bajos", "Perú", "Senegal", "Uzbekistán"],
+        "K": ["Alemania", "Suiza", "Irán", "Camerún"],
+        "L": ["Croacia", "Dinamarca", "Túnez", "Costa Rica"]
+    };
 
-const teams = [
-"Argentina","Brasil","Francia","España",
-"Alemania","Inglaterra","Italia","Portugal",
-"Países Bajos","Bélgica","Uruguay","México",
-"EEUU","Canadá","Japón","Corea Sur",
-"Australia","Marruecos","Senegal","Croacia",
-"Suiza","Colombia","Chile","Perú",
-"Dinamarca","Polonia","Austria","Serbia",
-"Rumanía","Ecuador","Nigeria","Camerún",
-"Arabia Saudí","Qatar","Irán","Costa Rica",
-"Ghana","Túnez","Uzbekistán","Ucrania",
-"Paraguay","Venezuela","Nueva Zelanda","Egipto",
-"Jamaica","Sudáfrica","Islandia","Grecia"
-];
+    function inicializarGrupos() {
+        const container = document.getElementById('mundial-grid');
+        container.innerHTML = "";
 
-let groups = [];
+        for (const [letra, paises] of Object.entries(gruposData)) {
+            let html = `
+                <div class="card-grupo" id="grupo-${letra}">
+                    <h3>GRUPO ${letra}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>País</th>
+                                <th style="text-align:right">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${paises.map(p => `<tr><td>${p}</td><td class="pts">0</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.innerHTML += html;
+        }
+    }
 
-for(let i=0;i<12;i++){
-groups.push(teams.slice(i*4,(i+1)*4));
-}
+    function simularTorneo() {
+        for (const letra in gruposData) {
+            const container = document.querySelector(`#grupo-${letra} tbody`);
+            const equipos = gruposData[letra].map(nombre => ({
+                nombre: nombre,
+                pts: Math.floor(Math.random() * 8) // Simulación aleatoria simple (0-7 puntos)
+            }));
 
-function renderGroups(){
-const container=document.getElementById("groups");
-container.innerHTML="";
+            // Ordenar por puntos (descendente)
+            equipos.sort((a, b) => b.pts - a.pts);
 
-groups.forEach((group,index)=>{
-let html=`<div class="group">
-<h2>Grupo ${String.fromCharCode(65+index)}</h2>
-<table>
-<tr>
-<th>Equipo</th>
-<th>GF</th>
-<th>GC</th>
-</tr>`;
+            container.innerHTML = equipos.map((e, index) => `
+                <tr class="${index < 2 ? 'clasificado' : ''}">
+                    <td>${e.nombre}</td>
+                    <td class="pts">${e.pts}</td>
+                </tr>
+            `).join('');
+        }
+        alert("¡Fase de grupos simulada! Los marcados en verde avanzan a 1/16.");
+    }
 
-group.forEach(team=>{
-html+=`
-<tr>
-<td>${team}</td>
-<td><input type="number" id="${team}_gf"></td>
-<td><input type="number" id="${team}_gc"></td>
-</tr>`;
-});
-
-html+=`</table></div>`;
-container.innerHTML+=html;
-});
-}
-
-function calculateGroups(){
-let standings=[];
-
-groups.forEach(group=>{
-group.forEach(team=>{
-let gf=parseInt(document.getElementById(team+"_gf").value)||0;
-let gc=parseInt(document.getElementById(team+"_gc").value)||0;
-
-let points=0;
-if(gf>gc) points=3;
-else if(gf===gc) points=1;
-
-standings.push({
-team,
-points,
-gf,
-gc,
-dg:gf-gc
-});
-});
-});
-
-standings.sort((a,b)=>
-b.points-a.points || b.dg-a.dg || b.gf-a.gf
-);
-
-let qualified=standings.slice(0,16);
-
-renderKnockout(qualified);
-}
-
-function renderKnockout(teams){
-let knockout=document.getElementById("knockout");
-knockout.innerHTML="<h2>🏆 Dieciseisavos</h2>";
-
-for(let i=0;i<teams.length;i+=2){
-knockout.innerHTML+=`
-<div class="match">
-${teams[i].team} vs ${teams[i+1].team}
-<br>
-<input type="number" id="m${i}a"> -
-<input type="number" id="m${i}b">
-<button onclick="playMatch(${i})">Jugar</button>
-</div>`;
-}
-}
-
-let winners=[];
-
-function playMatch(i){
-let a=parseInt(document.getElementById("m"+i+"a").value)||0;
-let b=parseInt(document.getElementById("m"+i+"b").value)||0;
-
-let winner;
-
-if(a>b) winner="A";
-else if(b>a) winner="B";
-else winner=Math.random()>0.5?"A":"B";
-
-winners.push(winner);
-
-if(winners.length===8){
-document.getElementById("knockout").innerHTML+="<h2>Cuartos listos</h2>";
-}
-}
-
-renderGroups();
-
+    // Cargar al iniciar
+    window.onload = inicializarGrupos;
 </script>
 
 </body>
