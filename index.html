@@ -2,269 +2,200 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Action Heroes Universe</title>
+<title>Mundial 2026 Simulator</title>
 
 <style>
 body{
+font-family:Arial;
+background:#0b1d3a;
+color:white;
 margin:0;
-font-family:Arial, Helvetica, sans-serif;
-background:#0f0f0f;
-color:white;
-transition:0.5s;
 }
 
-header{
-background:#e50914;
-padding:20px;
+h1{
 text-align:center;
-font-size:28px;
-font-weight:bold;
-}
-
-.section-tabs{
-text-align:center;
-padding:10px;
-}
-
-.section-tabs button{
-padding:8px 15px;
-margin:5px;
-border:none;
-border-radius:20px;
-background:#333;
-color:white;
-cursor:pointer;
-}
-
-.section-tabs button.active{
-background:#e50914;
-}
-
-.container{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-gap:20px;
-padding:20px;
-}
-
-.card{
-background:#1c1c1c;
-border-radius:15px;
+background:#d62828;
+margin:0;
 padding:15px;
-text-align:center;
-cursor:pointer;
-transition:0.3s;
-box-shadow:0 0 10px black;
 }
 
-.card:hover{
-transform:scale(1.05);
-}
-
-.card img{
-width:100%;
-height:260px;
-object-fit:cover;
+.group{
+background:#142850;
+margin:15px;
+padding:15px;
 border-radius:10px;
 }
 
-.stars span{
-font-size:20px;
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+border:1px solid white;
+padding:5px;
+text-align:center;
+}
+
+input{
+width:40px;
+}
+
+button{
+background:#f77f00;
+border:none;
+padding:8px;
+margin-top:10px;
 cursor:pointer;
-color:gray;
+border-radius:5px;
 }
 
-.stars .active{
-color:gold;
+button:hover{
+background:#ff9e00;
 }
 
-/* TORNEO */
-
-.bracket{
-display:flex;
-justify-content:space-around;
-padding:20px;
-background:#111;
-}
-
-.round{
-width:30%;
+#knockout{
+background:#1b263b;
+margin:15px;
+padding:15px;
+border-radius:10px;
 }
 
 .match{
-background:#333;
 margin:10px 0;
-padding:8px;
-border-radius:5px;
-cursor:pointer;
-text-align:center;
-}
-
-.match:hover{
-background:#e50914;
-}
-
-.champion{
-text-align:center;
-font-size:22px;
-padding:15px;
-color:gold;
 }
 </style>
 </head>
 
 <body>
 
-<header>🔥 ACTION HEROES UNIVERSE 🔥</header>
+<h1>🌍 SIMULADOR OFICIAL MUNDIAL 2026</h1>
 
-<div class="section-tabs">
-<button onclick="setSection('all')" class="active">Todos</button>
-<button onclick="setSection('cine')">Cine</button>
-<button onclick="setSection('videojuegos')">Videojuegos</button>
-<button onclick="setSection('series')">Series</button>
-<button onclick="setSection('villanos')">Villanos</button>
-<button onclick="setSection('animacion')">Animación</button>
-</div>
+<div id="groups"></div>
 
-<div class="container" id="heroes"></div>
+<button onclick="calculateGroups()">Actualizar Clasificación</button>
 
-<h2 style="text-align:center">🏆 TORNEO</h2>
-<div class="bracket">
-<div class="round" id="quarter"><h3>Cuartos</h3></div>
-<div class="round" id="semi"><h3>Semifinal</h3></div>
-<div class="round" id="final"><h3>Final</h3></div>
-</div>
-<div class="champion" id="champion"></div>
+<div id="knockout"></div>
 
 <script>
 
-/* HEROES CON IMÁGENES REALES DE WIKIMEDIA */
-
-const heroes = [
-{name:"Rambo",section:"cine",img:"https://upload.wikimedia.org/wikipedia/en/5/5d/Rambo_First_Blood_Part_II.jpg"},
-{name:"John Wick",section:"cine",img:"https://upload.wikimedia.org/wikipedia/en/9/98/John_Wick_TeaserPoster.jpg"},
-{name:"Neo",section:"cine",img:"https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg"},
-{name:"Kratos",section:"videojuegos",img:"https://upload.wikimedia.org/wikipedia/en/a/a7/God_of_War_4_cover.jpg"},
-{name:"Scorpion",section:"videojuegos",img:"https://upload.wikimedia.org/wikipedia/en/7/7e/Mortal_Kombat_11_cover_art.png"},
-{name:"Nathan Drake",section:"videojuegos",img:"https://upload.wikimedia.org/wikipedia/en/1/1f/Uncharted_4_box_artwork.jpg"},
-{name:"Darth Vader",section:"villanos",img:"https://upload.wikimedia.org/wikipedia/en/7/76/Darth_Vader.jpg"},
-{name:"Thanos",section:"villanos",img:"https://upload.wikimedia.org/wikipedia/en/7/7b/Thanos_AIW.png"},
-{name:"Joker",section:"villanos",img:"https://upload.wikimedia.org/wikipedia/en/e/e1/Joker_%282019_film%29_poster.jpg"},
-{name:"Goku",section:"animacion",img:"https://upload.wikimedia.org/wikipedia/en/2/2f/Dragon_Ball_Super_Key_visual.jpg"},
-{name:"Homelander",section:"series",img:"https://upload.wikimedia.org/wikipedia/en/1/11/The_Boys_Season_3.jpg"},
-{name:"Geralt",section:"series",img:"https://upload.wikimedia.org/wikipedia/en/1/1e/The_Witcher_Title_Card.png"}
+const teams = [
+"Argentina","Brasil","Francia","España",
+"Alemania","Inglaterra","Italia","Portugal",
+"Países Bajos","Bélgica","Uruguay","México",
+"EEUU","Canadá","Japón","Corea Sur",
+"Australia","Marruecos","Senegal","Croacia",
+"Suiza","Colombia","Chile","Perú",
+"Dinamarca","Polonia","Austria","Serbia",
+"Rumanía","Ecuador","Nigeria","Camerún",
+"Arabia Saudí","Qatar","Irán","Costa Rica",
+"Ghana","Túnez","Uzbekistán","Ucrania",
+"Paraguay","Venezuela","Nueva Zelanda","Egipto",
+"Jamaica","Sudáfrica","Islandia","Grecia"
 ];
 
-let ratings = JSON.parse(localStorage.getItem("ratings")) || {};
-let votes = JSON.parse(localStorage.getItem("votes")) || {};
-let section="all";
+let groups = [];
 
-/* RENDER HEROES */
+for(let i=0;i<12;i++){
+groups.push(teams.slice(i*4,(i+1)*4));
+}
 
-function renderHeroes(){
-const container=document.getElementById("heroes");
+function renderGroups(){
+const container=document.getElementById("groups");
 container.innerHTML="";
 
-heroes
-.filter(h=>section==="all"||h.section===section)
-.forEach(hero=>{
-let avg=getAverage(hero.name);
+groups.forEach((group,index)=>{
+let html=`<div class="group">
+<h2>Grupo ${String.fromCharCode(65+index)}</h2>
+<table>
+<tr>
+<th>Equipo</th>
+<th>GF</th>
+<th>GC</th>
+</tr>`;
 
-container.innerHTML+=`
-<div class="card">
-<img src="${hero.img}">
-<h3>${hero.name}</h3>
-<div class="stars">
-${[1,2,3,4,5].map(i=>
-`<span onclick="rateHero('${hero.name}',${i})"
-class="${i<=Math.round(avg)?'active':''}">★</span>`
-).join("")}
-</div>
-<p>⭐ ${avg.toFixed(1)}</p>
-</div>
-`;
+group.forEach(team=>{
+html+=`
+<tr>
+<td>${team}</td>
+<td><input type="number" id="${team}_gf"></td>
+<td><input type="number" id="${team}_gc"></td>
+</tr>`;
+});
+
+html+=`</table></div>`;
+container.innerHTML+=html;
 });
 }
 
-function setSection(sec){
-section=sec;
-document.querySelectorAll(".section-tabs button")
-.forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");
-renderHeroes();
+function calculateGroups(){
+let standings=[];
+
+groups.forEach(group=>{
+group.forEach(team=>{
+let gf=parseInt(document.getElementById(team+"_gf").value)||0;
+let gc=parseInt(document.getElementById(team+"_gc").value)||0;
+
+let points=0;
+if(gf>gc) points=3;
+else if(gf===gc) points=1;
+
+standings.push({
+team,
+points,
+gf,
+gc,
+dg:gf-gc
+});
+});
+});
+
+standings.sort((a,b)=>
+b.points-a.points || b.dg-a.dg || b.gf-a.gf
+);
+
+let qualified=standings.slice(0,16);
+
+renderKnockout(qualified);
 }
 
-function rateHero(name,value){
-ratings[name]=(ratings[name]||0)+value;
-votes[name]=(votes[name]||0)+1;
-localStorage.setItem("ratings",JSON.stringify(ratings));
-localStorage.setItem("votes",JSON.stringify(votes));
-renderHeroes();
-}
+function renderKnockout(teams){
+let knockout=document.getElementById("knockout");
+knockout.innerHTML="<h2>🏆 Dieciseisavos</h2>";
 
-function getAverage(name){
-if(!ratings[name]) return 0;
-return ratings[name]/votes[name];
-}
-
-/* -------- TORNEO REAL -------- */
-
-let quarterWinners=[];
-let semiWinners=[];
-
-function startTournament(){
-let shuffled=[...heroes].sort(()=>Math.random()-0.5).slice(0,8);
-let quarter=document.getElementById("quarter");
-quarter.innerHTML="<h3>Cuartos</h3>";
-document.getElementById("semi").innerHTML="<h3>Semifinal</h3>";
-document.getElementById("final").innerHTML="<h3>Final</h3>";
-document.getElementById("champion").innerHTML="";
-quarterWinners=[];
-semiWinners=[];
-
-for(let i=0;i<8;i+=2){
-quarter.innerHTML+=`
-<div class="match" onclick="advance('${shuffled[i].name}','${shuffled[i+1].name}',1)">
-${shuffled[i].name} vs ${shuffled[i+1].name}
+for(let i=0;i<teams.length;i+=2){
+knockout.innerHTML+=`
+<div class="match">
+${teams[i].team} vs ${teams[i+1].team}
+<br>
+<input type="number" id="m${i}a"> -
+<input type="number" id="m${i}b">
+<button onclick="playMatch(${i})">Jugar</button>
 </div>`;
 }
 }
 
-function advance(h1,h2,round){
-let winner=prompt(`¿Quién gana?\n1) ${h1}\n2) ${h2}`);
-winner = winner==="1"?h1:h2;
+let winners=[];
 
-if(round===1){
-quarterWinners.push(winner);
-if(quarterWinners.length===4){
-let semi=document.getElementById("semi");
-for(let i=0;i<4;i+=2){
-semi.innerHTML+=`
-<div class="match" onclick="advance('${quarterWinners[i]}','${quarterWinners[i+1]}',2)">
-${quarterWinners[i]} vs ${quarterWinners[i+1]}
-</div>`;
-}
-}
-}
+function playMatch(i){
+let a=parseInt(document.getElementById("m"+i+"a").value)||0;
+let b=parseInt(document.getElementById("m"+i+"b").value)||0;
 
-if(round===2){
-semiWinners.push(winner);
-if(semiWinners.length===2){
-let final=document.getElementById("final");
-final.innerHTML+=`
-<div class="match" onclick="advance('${semiWinners[0]}','${semiWinners[1]}',3)">
-${semiWinners[0]} vs ${semiWinners[1]}
-</div>`;
+let winner;
+
+if(a>b) winner="A";
+else if(b>a) winner="B";
+else winner=Math.random()>0.5?"A":"B";
+
+winners.push(winner);
+
+if(winners.length===8){
+document.getElementById("knockout").innerHTML+="<h2>Cuartos listos</h2>";
 }
 }
 
-if(round===3){
-document.getElementById("champion").innerHTML="🏆 CAMPEÓN: "+winner;
-}
-}
-
-startTournament();
-renderHeroes();
+renderGroups();
 
 </script>
 
