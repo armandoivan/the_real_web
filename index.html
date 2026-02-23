@@ -2,37 +2,31 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Action Heroes Arena</title>
+<title>Action Heroes Universe</title>
 
 <style>
 body{
 margin:0;
-font-family:Arial, Helvetica, sans-serif;
-background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+font-family:Arial;
+background:#0f0f0f;
 color:white;
+transition:0.5s;
 }
 
 header{
-text-align:center;
-padding:20px;
-font-size:30px;
-font-weight:bold;
 background:#e50914;
-}
-
-.controls{
+padding:20px;
 text-align:center;
-padding:15px;
+font-size:28px;
+font-weight:bold;
 }
 
-input{
+.section-tabs{
+text-align:center;
 padding:10px;
-border-radius:20px;
-border:none;
-width:250px;
 }
 
-button{
+.section-tabs button{
 padding:8px 15px;
 margin:5px;
 border:none;
@@ -42,13 +36,13 @@ color:white;
 cursor:pointer;
 }
 
-button:hover{
+.section-tabs button.active{
 background:#e50914;
 }
 
 .container{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
 gap:20px;
 padding:20px;
 }
@@ -60,26 +54,22 @@ padding:15px;
 text-align:center;
 cursor:pointer;
 transition:0.3s;
-box-shadow:0 0 10px black;
+overflow:hidden;
+position:relative;
 }
 
-.card:hover{
-transform:scale(1.05);
-}
-
-.avatar{
-height:120px;
+.card img{
+width:100%;
 border-radius:10px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:40px;
-font-weight:bold;
-background:linear-gradient(45deg,#e50914,#b81d24);
+transition:0.3s;
+}
+
+.card:hover img{
+transform:scale(1.1);
 }
 
 .stars span{
-font-size:22px;
+font-size:20px;
 cursor:pointer;
 color:gray;
 }
@@ -88,240 +78,153 @@ color:gray;
 color:gold;
 }
 
-.top10, .vs, .tournament{
+.bracket{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+padding:20px;
 background:#111;
-padding:15px;
-margin:15px;
+}
+
+.round{
+background:#1c1c1c;
+padding:10px;
 border-radius:10px;
 }
 
-.modal{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.9);
-display:none;
-justify-content:center;
-align-items:center;
-}
-
-.modal-content{
-background:#1c1c1c;
-padding:25px;
-border-radius:15px;
-width:500px;
-max-height:80%;
-overflow-y:auto;
-}
-
-.close{
-float:right;
+.match{
+margin:10px 0;
+padding:5px;
+background:#333;
+border-radius:5px;
 cursor:pointer;
-color:#e50914;
-font-size:20px;
-}
-
-h2{
-margin-top:0;
 }
 </style>
 </head>
 
 <body>
 
-<header>🔥 ACTION HEROES ARENA 🔥</header>
+<header>🔥 ACTION HEROES UNIVERSE 🔥</header>
 
-<div class="controls">
-<input type="text" placeholder="Buscar héroe..." oninput="searchHero(this.value)">
-<button onclick="startTournament()">🥊 Modo Torneo</button>
-</div>
-
-<div class="top10">
-<h2>🏆 Top 10 Global</h2>
-<ol id="topList"></ol>
-</div>
-
-<div class="vs">
-<h2>⚔️ Comparador</h2>
-<select id="hero1"></select>
-<select id="hero2"></select>
-<button onclick="compareHeroes()">Comparar</button>
-<p id="vsResult"></p>
-</div>
-
-<div class="tournament" id="tournamentArea" style="display:none;">
-<h2>🥊 Torneo Eliminatorio</h2>
-<p id="match"></p>
-<button onclick="voteTournament(1)">Votar Izquierda</button>
-<button onclick="voteTournament(2)">Votar Derecha</button>
+<div class="section-tabs">
+<button onclick="setSection('all')" class="active">Todos</button>
+<button onclick="setSection('cine')">Cine</button>
+<button onclick="setSection('videojuegos')">Videojuegos</button>
+<button onclick="setSection('series')">Series</button>
+<button onclick="setSection('villanos')">Villanos</button>
+<button onclick="setSection('animacion')">Animación</button>
 </div>
 
 <div class="container" id="heroes"></div>
 
-<div class="modal" id="modal">
-<div class="modal-content" id="modalContent"></div>
+<h2 style="text-align:center">🏆 Torneo</h2>
+<div class="bracket">
+<div class="round" id="round1"><h3>Cuartos</h3></div>
+<div class="round" id="round2"><h3>Semifinal</h3></div>
+<div class="round" id="round3"><h3>Final</h3></div>
 </div>
+
+<audio id="goodSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
+<audio id="badSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-changing-tab-206.wav"></audio>
 
 <script>
 const heroes = [
-{
-name:"Rambo",
-description:`John Rambo es un veterano de la Guerra de Vietnam marcado por el trauma y el rechazo social. 
-Especialista en supervivencia extrema, combate de guerrilla y armas pesadas, 
-representa el arquetipo del soldado imparable. 
-Su capacidad de resistencia física y mental lo convierte en una auténtica máquina de guerra individual.`,
-},
-{
-name:"John Wick",
-description:`John Wick es un asesino legendario conocido en el mundo criminal como "Baba Yaga". 
-Combina artes marciales, precisión con armas y una inteligencia táctica extraordinaria. 
-Tras la muerte de su perro —último recuerdo de su esposa— desata una ola de violencia metódica y elegante.`,
-},
-{
-name:"Terminator T-800",
-description:`El T-800 es un cyborg asesino enviado desde el futuro. 
-Posee fuerza sobrehumana, resistencia extrema y una programación de combate perfecta. 
-Aunque fue diseñado para destruir, demuestra evolución emocional y capacidad de aprendizaje.`,
-},
-{
-name:"Neo",
-description:`Neo es el Elegido dentro de Matrix. 
-Capaz de manipular la realidad digital, detener balas y volar, 
-representa la liberación de la mente humana frente al control de las máquinas.`,
-},
-{
-name:"Bruce Lee",
-description:`Bruce Lee revolucionó el cine de acción y las artes marciales. 
-Su velocidad, precisión y filosofía del Jeet Kune Do cambiaron la percepción mundial del combate. 
-Más que un luchador, fue un pensador y visionario.`,
-},
-{
-name:"Rocky Balboa",
-description:`Rocky Balboa es el símbolo del esfuerzo y la superación. 
-Desde sus humildes orígenes en Filadelfia hasta convertirse en campeón mundial, 
-su fuerza no solo es física sino emocional.`,
-},
-{
-name:"Predator",
-description:`El Predator es un cazador alienígena con tecnología avanzada, invisibilidad y visión térmica. 
-Busca oponentes dignos y considera la caza un ritual de honor.`,
-}
+{name:"Rambo",section:"cine"},
+{name:"John Wick",section:"cine"},
+{name:"Neo",section:"cine"},
+{name:"Kratos",section:"videojuegos"},
+{name:"Scorpion",section:"videojuegos"},
+{name:"Nathan Drake",section:"videojuegos"},
+{name:"Batman",section:"cine"},
+{name:"The Punisher",section:"series"},
+{name:"Darth Vader",section:"villanos"},
+{name:"Thanos",section:"villanos"},
+{name:"Joker",section:"villanos"},
+{name:"Goku",section:"animacion"},
+{name:"Vegeta",section:"animacion"},
+{name:"Homelander",section:"series"},
+{name:"Geralt",section:"series"},
+{name:"Master Chief",section:"videojuegos"},
+{name:"Solid Snake",section:"videojuegos"},
+{name:"Predator",section:"cine"},
+{name:"Terminator",section:"cine"},
+{name:"Leon Kennedy",section:"videojuegos"},
+{name:"Lara Croft",section:"videojuegos"},
+{name:"Spawn",section:"animacion"},
+{name:"Omni-Man",section:"series"},
+{name:"Sub-Zero",section:"videojuegos"},
+{name:"Deadpool",section:"cine"},
+{name:"Wolverine",section:"cine"},
+{name:"Hulk",section:"cine"},
+{name:"Thor",section:"cine"},
+{name:"Bane",section:"villanos"},
+{name:"Magneto",section:"villanos"},
+{name:"Ahsoka",section:"series"},
+{name:"Mandalorian",section:"series"},
+{name:"Rick Grimes",section:"series"},
+{name:"Optimus Prime",section:"animacion"},
+{name:"Shredder",section:"villanos"}
 ];
 
 let ratings = JSON.parse(localStorage.getItem("ratings")) || {};
-let votes = JSON.parse(localStorage.getItem("votes")) || {};
-let searchText = "";
+let section="all";
+
+function setSection(sec){
+section=sec;
+document.querySelectorAll(".section-tabs button")
+.forEach(b=>b.classList.remove("active"));
+event.target.classList.add("active");
+renderHeroes();
+}
 
 function renderHeroes(){
 const container=document.getElementById("heroes");
 container.innerHTML="";
 
 heroes
-.filter(h=>h.name.toLowerCase().includes(searchText.toLowerCase()))
-.sort((a,b)=>getAverage(b.name)-getAverage(a.name))
+.filter(h=>section==="all"||h.section===section)
 .forEach(hero=>{
+const rating=ratings[hero.name]||0;
+
 container.innerHTML+=`
-<div class="card" onclick="openModal('${hero.name}')">
-<div class="avatar">${hero.name.charAt(0)}</div>
+<div class="card">
+<img src="https://api.dicebear.com/7.x/adventurer/svg?seed=${hero.name}">
 <h3>${hero.name}</h3>
-<div class="stars" onclick="event.stopPropagation()">
+<div class="stars">
 ${[1,2,3,4,5].map(i=>
 `<span onclick="rateHero('${hero.name}',${i})"
-class="${i<=Math.round(getAverage(hero.name))?'active':''}">★</span>`
+class="${i<=rating?'active':''}">★</span>`
 ).join("")}
 </div>
-<p>⭐ ${getAverage(hero.name).toFixed(1)} (${votes[hero.name]||0} votos)</p>
+<p>${rating}/5</p>
 </div>
 `;
 });
-renderTop10();
-renderSelects();
 }
 
 function rateHero(name,value){
-ratings[name]=(ratings[name]||0)+value;
-votes[name]=(votes[name]||0)+1;
+ratings[name]=value;
 localStorage.setItem("ratings",JSON.stringify(ratings));
-localStorage.setItem("votes",JSON.stringify(votes));
+if(value>=4){
+document.getElementById("goodSound").play();
+}else{
+document.getElementById("badSound").play();
+}
 renderHeroes();
 }
 
-function getAverage(name){
-if(!ratings[name]) return 0;
-return ratings[name]/votes[name];
+/* -------- TORNEO -------- */
+
+function createTournament(){
+let shuffled=[...heroes].sort(()=>Math.random()-0.5).slice(0,8);
+const r1=document.getElementById("round1");
+r1.innerHTML="<h3>Cuartos</h3>";
+shuffled.forEach(h=>{
+r1.innerHTML+=`<div class="match">${h.name}</div>`;
+});
 }
 
-function renderTop10(){
-let sorted=[...heroes].sort((a,b)=>getAverage(b.name)-getAverage(a.name)).slice(0,10);
-document.getElementById("topList").innerHTML=
-sorted.map(h=>`<li>${h.name} - ${getAverage(h.name).toFixed(1)}</li>`).join("");
-}
-
-function renderSelects(){
-document.getElementById("hero1").innerHTML=
-heroes.map(h=>`<option>${h.name}</option>`).join("");
-document.getElementById("hero2").innerHTML=
-heroes.map(h=>`<option>${h.name}</option>`).join("");
-}
-
-function compareHeroes(){
-let h1=document.getElementById("hero1").value;
-let h2=document.getElementById("hero2").value;
-let r1=getAverage(h1);
-let r2=getAverage(h2);
-let result=r1>r2?`🏆 ${h1} ganaría.`:r2>r1?`🏆 ${h2} ganaría.`:"🤝 Empate.";
-document.getElementById("vsResult").innerText=result;
-}
-
-function searchHero(text){
-searchText=text;
-renderHeroes();
-}
-
-function openModal(name){
-const hero=heroes.find(h=>h.name===name);
-document.getElementById("modalContent").innerHTML=`
-<span class="close" onclick="closeModal()">✖</span>
-<h2>${hero.name}</h2>
-<p style="line-height:1.6">${hero.description}</p>
-<p><strong>Puntuación media:</strong> ${getAverage(name).toFixed(1)}</p>
-`;
-document.getElementById("modal").style.display="flex";
-}
-
-function closeModal(){
-document.getElementById("modal").style.display="none";
-}
-
-/* -------- MODO TORNEO -------- */
-
-let tournament=[];
-let currentMatch=[];
-
-function startTournament(){
-tournament=[...heroes].sort(()=>Math.random()-0.5);
-document.getElementById("tournamentArea").style.display="block";
-nextMatch();
-}
-
-function nextMatch(){
-if(tournament.length<2){
-document.getElementById("match").innerText="🏆 Campeón: "+tournament[0].name;
-return;
-}
-currentMatch=[tournament.shift(),tournament.shift()];
-document.getElementById("match").innerText=
-currentMatch[0].name+" VS "+currentMatch[1].name;
-}
-
-function voteTournament(side){
-let winner=side===1?currentMatch[0]:currentMatch[1];
-tournament.push(winner);
-nextMatch();
-}
-
+createTournament();
 renderHeroes();
 </script>
 
