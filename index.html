@@ -2,73 +2,160 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Action Heroes Rank Ultimate</title>
+<title>Action Heroes Arena</title>
+
 <style>
-body{font-family:Arial;background:#0f0f0f;color:white;margin:0}
-header{background:#e50914;padding:15px;text-align:center;font-size:26px;font-weight:bold}
-.controls{text-align:center;padding:10px}
-.controls input{
-padding:8px;width:200px;border-radius:20px;border:none
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
 }
-.controls button{
-margin:5px;padding:8px 15px;border:none;border-radius:20px;
-background:#333;color:white;cursor:pointer
+
+header{
+text-align:center;
+padding:20px;
+font-size:30px;
+font-weight:bold;
+background:#e50914;
 }
-.controls button.active{background:#e50914}
+
+.controls{
+text-align:center;
+padding:15px;
+}
+
+input{
+padding:10px;
+border-radius:20px;
+border:none;
+width:250px;
+}
+
+button{
+padding:8px 15px;
+margin:5px;
+border:none;
+border-radius:20px;
+background:#333;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#e50914;
+}
+
 .container{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-gap:20px;padding:20px
+grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+gap:20px;
+padding:20px;
 }
+
 .card{
-background:#1c1c1c;border-radius:12px;padding:15px;text-align:center;
-cursor:pointer;transition:0.2s
+background:#1c1c1c;
+border-radius:15px;
+padding:15px;
+text-align:center;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 0 10px black;
 }
-.card:hover{transform:scale(1.05)}
-.card img{width:100%;border-radius:10px}
-.stars span{font-size:20px;cursor:pointer;color:gray}
-.stars .active{color:gold}
-.top10{
-background:#111;padding:15px
+
+.card:hover{
+transform:scale(1.05);
 }
+
+.avatar{
+height:120px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:40px;
+font-weight:bold;
+background:linear-gradient(45deg,#e50914,#b81d24);
+}
+
+.stars span{
+font-size:22px;
+cursor:pointer;
+color:gray;
+}
+
+.stars .active{
+color:gold;
+}
+
+.top10, .vs, .tournament{
+background:#111;
+padding:15px;
+margin:15px;
+border-radius:10px;
+}
+
 .modal{
-position:fixed;top:0;left:0;width:100%;height:100%;
-background:rgba(0,0,0,0.85);
-display:none;justify-content:center;align-items:center
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+display:none;
+justify-content:center;
+align-items:center;
 }
+
 .modal-content{
-background:#1c1c1c;padding:20px;border-radius:12px;
-width:350px;text-align:center
+background:#1c1c1c;
+padding:25px;
+border-radius:15px;
+width:500px;
+max-height:80%;
+overflow-y:auto;
 }
-.close{color:#e50914;cursor:pointer;font-size:20px}
-.vs-section{text-align:center;padding:15px;background:#111}
-select{padding:5px;border-radius:10px}
+
+.close{
+float:right;
+cursor:pointer;
+color:#e50914;
+font-size:20px;
+}
+
+h2{
+margin-top:0;
+}
 </style>
 </head>
+
 <body>
 
-<header>🔥 Action Heroes Rank ULTIMATE</header>
+<header>🔥 ACTION HEROES ARENA 🔥</header>
 
 <div class="controls">
 <input type="text" placeholder="Buscar héroe..." oninput="searchHero(this.value)">
-<br>
-<button onclick="setFilter('all')" class="active">Todos</button>
-<button onclick="setFilter('shooters')">Disparos</button>
-<button onclick="setFilter('martial')">Artes Marciales</button>
-<button onclick="setFilter('scifi')">Ciencia Ficción</button>
+<button onclick="startTournament()">🥊 Modo Torneo</button>
 </div>
 
 <div class="top10">
-<h2>🏆 Top 10</h2>
+<h2>🏆 Top 10 Global</h2>
 <ol id="topList"></ol>
 </div>
 
-<div class="vs-section">
+<div class="vs">
 <h2>⚔️ Comparador</h2>
 <select id="hero1"></select>
 <select id="hero2"></select>
 <button onclick="compareHeroes()">Comparar</button>
 <p id="vsResult"></p>
+</div>
+
+<div class="tournament" id="tournamentArea" style="display:none;">
+<h2>🥊 Torneo Eliminatorio</h2>
+<p id="match"></p>
+<button onclick="voteTournament(1)">Votar Izquierda</button>
+<button onclick="voteTournament(2)">Votar Derecha</button>
 </div>
 
 <div class="container" id="heroes"></div>
@@ -78,93 +165,74 @@ select{padding:5px;border-radius:10px}
 </div>
 
 <script>
-const heroes=[
+const heroes = [
 {
 name:"Rambo",
-category:"shooters",
-img:"https://m.media-amazon.com/images/I/51nZpXK1OGL._AC_.jpg",
-info:"John Rambo es un veterano de la guerra de Vietnam experto en supervivencia, tácticas de guerrilla y combate extremo. Representa la resistencia absoluta y la lucha individual contra sistemas corruptos.",
-movies:"First Blood (1982) - Rambo Saga"
+description:`John Rambo es un veterano de la Guerra de Vietnam marcado por el trauma y el rechazo social. 
+Especialista en supervivencia extrema, combate de guerrilla y armas pesadas, 
+representa el arquetipo del soldado imparable. 
+Su capacidad de resistencia física y mental lo convierte en una auténtica máquina de guerra individual.`,
 },
 {
 name:"John Wick",
-category:"shooters",
-img:"https://m.media-amazon.com/images/I/71xBLRBYOiL._AC_SY679_.jpg",
-info:"Un asesino legendario conocido como 'Baba Yaga'. Combina precisión táctica, combate cuerpo a cuerpo y uso experto de armas en un mundo criminal altamente organizado.",
-movies:"John Wick 1-4"
+description:`John Wick es un asesino legendario conocido en el mundo criminal como "Baba Yaga". 
+Combina artes marciales, precisión con armas y una inteligencia táctica extraordinaria. 
+Tras la muerte de su perro —último recuerdo de su esposa— desata una ola de violencia metódica y elegante.`,
 },
 {
 name:"Terminator T-800",
-category:"scifi",
-img:"https://m.media-amazon.com/images/I/71X2vNfYHjL._AC_SY679_.jpg",
-info:"Cyborg enviado desde el futuro con fuerza sobrehumana, resistencia extrema y programación de combate avanzada. Una máquina imparable.",
-movies:"Terminator Saga"
+description:`El T-800 es un cyborg asesino enviado desde el futuro. 
+Posee fuerza sobrehumana, resistencia extrema y una programación de combate perfecta. 
+Aunque fue diseñado para destruir, demuestra evolución emocional y capacidad de aprendizaje.`,
 },
 {
 name:"Neo",
-category:"scifi",
-img:"https://m.media-amazon.com/images/I/51EG732BV3L.jpg",
-info:"El elegido dentro de Matrix. Capaz de manipular la realidad digital, detener balas y dominar artes marciales a nivel sobrehumano.",
-movies:"Matrix Saga"
+description:`Neo es el Elegido dentro de Matrix. 
+Capaz de manipular la realidad digital, detener balas y volar, 
+representa la liberación de la mente humana frente al control de las máquinas.`,
 },
 {
 name:"Bruce Lee",
-category:"martial",
-img:"https://m.media-amazon.com/images/I/51n0v6C2p-L._AC_.jpg",
-info:"Icono mundial de las artes marciales. Velocidad, precisión y filosofía de combate revolucionaria que cambió el cine de acción.",
-movies:"Enter the Dragon (1973)"
-},
-{
-name:"Ip Man",
-category:"martial",
-img:"https://m.media-amazon.com/images/I/51X7Y6M6XzL._AC_.jpg",
-info:"Maestro de Wing Chun y mentor de Bruce Lee. Representa disciplina, técnica refinada y combate elegante pero letal.",
-movies:"Ip Man Saga"
+description:`Bruce Lee revolucionó el cine de acción y las artes marciales. 
+Su velocidad, precisión y filosofía del Jeet Kune Do cambiaron la percepción mundial del combate. 
+Más que un luchador, fue un pensador y visionario.`,
 },
 {
 name:"Rocky Balboa",
-category:"martial",
-img:"https://m.media-amazon.com/images/I/71vZJpXxH1L._AC_SY679_.jpg",
-info:"Boxeador de origen humilde que simboliza la perseverancia y el espíritu de superación frente a rivales aparentemente invencibles.",
-movies:"Rocky Saga"
+description:`Rocky Balboa es el símbolo del esfuerzo y la superación. 
+Desde sus humildes orígenes en Filadelfia hasta convertirse en campeón mundial, 
+su fuerza no solo es física sino emocional.`,
 },
 {
 name:"Predator",
-category:"scifi",
-img:"https://m.media-amazon.com/images/I/51F6dS6mDML._AC_.jpg",
-info:"Cazador alienígena con tecnología avanzada, camuflaje y fuerza superior. Persigue a los guerreros más fuertes como trofeos.",
-movies:"Predator Saga"
+description:`El Predator es un cazador alienígena con tecnología avanzada, invisibilidad y visión térmica. 
+Busca oponentes dignos y considera la caza un ritual de honor.`,
 }
 ];
 
-let ratings=JSON.parse(localStorage.getItem("ratings"))||{};
-let filter="all";
-let searchText="";
+let ratings = JSON.parse(localStorage.getItem("ratings")) || {};
+let votes = JSON.parse(localStorage.getItem("votes")) || {};
+let searchText = "";
 
 function renderHeroes(){
 const container=document.getElementById("heroes");
 container.innerHTML="";
 
-let filtered=heroes.filter(h=>
-(filter==="all"||h.category===filter)&&
-h.name.toLowerCase().includes(searchText.toLowerCase())
-);
-
-filtered.sort((a,b)=>(ratings[b.name]||0)-(ratings[a.name]||0));
-
-filtered.forEach(hero=>{
-const rating=ratings[hero.name]||0;
+heroes
+.filter(h=>h.name.toLowerCase().includes(searchText.toLowerCase()))
+.sort((a,b)=>getAverage(b.name)-getAverage(a.name))
+.forEach(hero=>{
 container.innerHTML+=`
 <div class="card" onclick="openModal('${hero.name}')">
-<img src="${hero.img}">
+<div class="avatar">${hero.name.charAt(0)}</div>
 <h3>${hero.name}</h3>
 <div class="stars" onclick="event.stopPropagation()">
 ${[1,2,3,4,5].map(i=>
 `<span onclick="rateHero('${hero.name}',${i})"
-class="${i<=rating?'active':''}">★</span>`
+class="${i<=Math.round(getAverage(hero.name))?'active':''}">★</span>`
 ).join("")}
 </div>
-<p>${rating}/5</p>
+<p>⭐ ${getAverage(hero.name).toFixed(1)} (${votes[hero.name]||0} votos)</p>
 </div>
 `;
 });
@@ -173,17 +241,38 @@ renderSelects();
 }
 
 function rateHero(name,value){
-ratings[name]=value;
+ratings[name]=(ratings[name]||0)+value;
+votes[name]=(votes[name]||0)+1;
 localStorage.setItem("ratings",JSON.stringify(ratings));
+localStorage.setItem("votes",JSON.stringify(votes));
 renderHeroes();
 }
 
-function setFilter(f){
-filter=f;
-document.querySelectorAll(".controls button")
-.forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");
-renderHeroes();
+function getAverage(name){
+if(!ratings[name]) return 0;
+return ratings[name]/votes[name];
+}
+
+function renderTop10(){
+let sorted=[...heroes].sort((a,b)=>getAverage(b.name)-getAverage(a.name)).slice(0,10);
+document.getElementById("topList").innerHTML=
+sorted.map(h=>`<li>${h.name} - ${getAverage(h.name).toFixed(1)}</li>`).join("");
+}
+
+function renderSelects(){
+document.getElementById("hero1").innerHTML=
+heroes.map(h=>`<option>${h.name}</option>`).join("");
+document.getElementById("hero2").innerHTML=
+heroes.map(h=>`<option>${h.name}</option>`).join("");
+}
+
+function compareHeroes(){
+let h1=document.getElementById("hero1").value;
+let h2=document.getElementById("hero2").value;
+let r1=getAverage(h1);
+let r2=getAverage(h2);
+let result=r1>r2?`🏆 ${h1} ganaría.`:r2>r1?`🏆 ${h2} ganaría.`:"🤝 Empate.";
+document.getElementById("vsResult").innerText=result;
 }
 
 function searchHero(text){
@@ -191,45 +280,13 @@ searchText=text;
 renderHeroes();
 }
 
-function renderTop10(){
-let sorted=[...heroes].sort((a,b)=>
-(ratings[b.name]||0)-(ratings[a.name]||0)
-).slice(0,10);
-
-document.getElementById("topList").innerHTML=
-sorted.map(h=>`<li>${h.name} - ${ratings[h.name]||0}/5</li>`).join("");
-}
-
-function renderSelects(){
-let selects=document.querySelectorAll("select");
-selects.forEach(s=>{
-s.innerHTML=heroes.map(h=>`<option>${h.name}</option>`).join("");
-});
-}
-
-function compareHeroes(){
-let h1=document.getElementById("hero1").value;
-let h2=document.getElementById("hero2").value;
-let r1=ratings[h1]||0;
-let r2=ratings[h2]||0;
-
-let result="";
-if(r1>r2) result=`🏆 ${h1} ganaría según la puntuación.`;
-else if(r2>r1) result=`🏆 ${h2} ganaría según la puntuación.`;
-else result="🤝 Empate técnico.";
-
-document.getElementById("vsResult").innerText=result;
-}
-
 function openModal(name){
 const hero=heroes.find(h=>h.name===name);
 document.getElementById("modalContent").innerHTML=`
 <span class="close" onclick="closeModal()">✖</span>
-<img src="${hero.img}">
 <h2>${hero.name}</h2>
-<p>${hero.info}</p>
-<p><strong>Películas:</strong> ${hero.movies}</p>
-<p><strong>Puntuación actual:</strong> ${ratings[name]||0}/5</p>
+<p style="line-height:1.6">${hero.description}</p>
+<p><strong>Puntuación media:</strong> ${getAverage(name).toFixed(1)}</p>
 `;
 document.getElementById("modal").style.display="flex";
 }
@@ -238,7 +295,35 @@ function closeModal(){
 document.getElementById("modal").style.display="none";
 }
 
+/* -------- MODO TORNEO -------- */
+
+let tournament=[];
+let currentMatch=[];
+
+function startTournament(){
+tournament=[...heroes].sort(()=>Math.random()-0.5);
+document.getElementById("tournamentArea").style.display="block";
+nextMatch();
+}
+
+function nextMatch(){
+if(tournament.length<2){
+document.getElementById("match").innerText="🏆 Campeón: "+tournament[0].name;
+return;
+}
+currentMatch=[tournament.shift(),tournament.shift()];
+document.getElementById("match").innerText=
+currentMatch[0].name+" VS "+currentMatch[1].name;
+}
+
+function voteTournament(side){
+let winner=side===1?currentMatch[0]:currentMatch[1];
+tournament.push(winner);
+nextMatch();
+}
+
 renderHeroes();
 </script>
+
 </body>
 </html>
