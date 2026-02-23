@@ -2,234 +2,240 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Action Heroes Rank PRO</title>
+<title>Action Heroes Rank Ultimate</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background:#0f0f0f;
-    color:white;
-    margin:0;
+body{font-family:Arial;background:#0f0f0f;color:white;margin:0}
+header{background:#e50914;padding:15px;text-align:center;font-size:26px;font-weight:bold}
+.controls{text-align:center;padding:10px}
+.controls input{
+padding:8px;width:200px;border-radius:20px;border:none
 }
-header {
-    background:#e50914;
-    padding:15px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
+.controls button{
+margin:5px;padding:8px 15px;border:none;border-radius:20px;
+background:#333;color:white;cursor:pointer
 }
-.filters {
-    text-align:center;
-    padding:10px;
+.controls button.active{background:#e50914}
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:20px;padding:20px
 }
-.filters button {
-    margin:5px;
-    padding:8px 15px;
-    border:none;
-    border-radius:20px;
-    background:#333;
-    color:white;
-    cursor:pointer;
+.card{
+background:#1c1c1c;border-radius:12px;padding:15px;text-align:center;
+cursor:pointer;transition:0.2s
 }
-.filters button.active {
-    background:#e50914;
+.card:hover{transform:scale(1.05)}
+.card img{width:100%;border-radius:10px}
+.stars span{font-size:20px;cursor:pointer;color:gray}
+.stars .active{color:gold}
+.top10{
+background:#111;padding:15px
 }
-.container {
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-    gap:20px;
-    padding:20px;
+.modal{
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.85);
+display:none;justify-content:center;align-items:center
 }
-.card {
-    background:#1c1c1c;
-    border-radius:12px;
-    padding:15px;
-    text-align:center;
-    cursor:pointer;
-    transition:0.2s;
+.modal-content{
+background:#1c1c1c;padding:20px;border-radius:12px;
+width:350px;text-align:center
 }
-.card:hover {
-    transform:scale(1.05);
-}
-.card img {
-    width:100%;
-    border-radius:10px;
-}
-.stars span {
-    font-size:20px;
-    cursor:pointer;
-    color:gray;
-}
-.stars .active {
-    color:gold;
-}
-.modal {
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.8);
-    display:none;
-    justify-content:center;
-    align-items:center;
-}
-.modal-content {
-    background:#1c1c1c;
-    padding:20px;
-    border-radius:12px;
-    width:300px;
-    text-align:center;
-}
-.modal img {
-    width:100%;
-    border-radius:10px;
-}
-.close {
-    color:#e50914;
-    cursor:pointer;
-    float:right;
-    font-size:20px;
-}
+.close{color:#e50914;cursor:pointer;font-size:20px}
+.vs-section{text-align:center;padding:15px;background:#111}
+select{padding:5px;border-radius:10px}
 </style>
 </head>
 <body>
 
-<header>🔥 Action Heroes Rank PRO</header>
+<header>🔥 Action Heroes Rank ULTIMATE</header>
 
-<div class="filters">
-    <button onclick="setFilter('all')" class="active">Todos</button>
-    <button onclick="setFilter('shooters')">Disparos</button>
-    <button onclick="setFilter('martial')">Artes Marciales</button>
-    <button onclick="setFilter('scifi')">Ciencia Ficción</button>
+<div class="controls">
+<input type="text" placeholder="Buscar héroe..." oninput="searchHero(this.value)">
+<br>
+<button onclick="setFilter('all')" class="active">Todos</button>
+<button onclick="setFilter('shooters')">Disparos</button>
+<button onclick="setFilter('martial')">Artes Marciales</button>
+<button onclick="setFilter('scifi')">Ciencia Ficción</button>
+</div>
+
+<div class="top10">
+<h2>🏆 Top 10</h2>
+<ol id="topList"></ol>
+</div>
+
+<div class="vs-section">
+<h2>⚔️ Comparador</h2>
+<select id="hero1"></select>
+<select id="hero2"></select>
+<button onclick="compareHeroes()">Comparar</button>
+<p id="vsResult"></p>
 </div>
 
 <div class="container" id="heroes"></div>
 
 <div class="modal" id="modal">
-    <div class="modal-content" id="modalContent"></div>
+<div class="modal-content" id="modalContent"></div>
 </div>
 
 <script>
-const heroes = [
+const heroes=[
 {
- name:"Rambo",
- category:"shooters",
- img:"https://upload.wikimedia.org/wikipedia/en/5/5d/Rambo_First_Blood_Part_II.jpg",
- info:"Veterano de Vietnam experto en supervivencia.",
- movies:"First Blood, Rambo II, Rambo III"
+name:"Rambo",
+category:"shooters",
+img:"https://m.media-amazon.com/images/I/51nZpXK1OGL._AC_.jpg",
+info:"John Rambo es un veterano de la guerra de Vietnam experto en supervivencia, tácticas de guerrilla y combate extremo. Representa la resistencia absoluta y la lucha individual contra sistemas corruptos.",
+movies:"First Blood (1982) - Rambo Saga"
 },
 {
- name:"John Wick",
- category:"shooters",
- img:"https://upload.wikimedia.org/wikipedia/en/9/98/John_Wick_TeaserPoster.jpg",
- info:"Asesino legendario conocido como Baba Yaga.",
- movies:"John Wick 1-4"
+name:"John Wick",
+category:"shooters",
+img:"https://m.media-amazon.com/images/I/71xBLRBYOiL._AC_SY679_.jpg",
+info:"Un asesino legendario conocido como 'Baba Yaga'. Combina precisión táctica, combate cuerpo a cuerpo y uso experto de armas en un mundo criminal altamente organizado.",
+movies:"John Wick 1-4"
 },
 {
- name:"Terminator T-800",
- category:"scifi",
- img:"https://upload.wikimedia.org/wikipedia/en/7/7f/Terminator2poster.jpg",
- info:"Cyborg del futuro con fuerza extrema.",
- movies:"Terminator 1-6"
+name:"Terminator T-800",
+category:"scifi",
+img:"https://m.media-amazon.com/images/I/71X2vNfYHjL._AC_SY679_.jpg",
+info:"Cyborg enviado desde el futuro con fuerza sobrehumana, resistencia extrema y programación de combate avanzada. Una máquina imparable.",
+movies:"Terminator Saga"
 },
 {
- name:"Neo",
- category:"scifi",
- img:"https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg",
- info:"El elegido dentro de Matrix.",
- movies:"Matrix Trilogy"
+name:"Neo",
+category:"scifi",
+img:"https://m.media-amazon.com/images/I/51EG732BV3L.jpg",
+info:"El elegido dentro de Matrix. Capaz de manipular la realidad digital, detener balas y dominar artes marciales a nivel sobrehumano.",
+movies:"Matrix Saga"
 },
 {
- name:"Bruce Lee",
- category:"martial",
- img:"https://upload.wikimedia.org/wikipedia/en/3/3c/Enter_the_Dragon_poster.jpg",
- info:"Maestro absoluto de artes marciales.",
- movies:"Enter the Dragon"
+name:"Bruce Lee",
+category:"martial",
+img:"https://m.media-amazon.com/images/I/51n0v6C2p-L._AC_.jpg",
+info:"Icono mundial de las artes marciales. Velocidad, precisión y filosofía de combate revolucionaria que cambió el cine de acción.",
+movies:"Enter the Dragon (1973)"
 },
 {
- name:"Ip Man",
- category:"martial",
- img:"https://upload.wikimedia.org/wikipedia/en/4/4c/Ip_Man_poster.jpg",
- info:"Gran maestro de Wing Chun.",
- movies:"Ip Man 1-4"
+name:"Ip Man",
+category:"martial",
+img:"https://m.media-amazon.com/images/I/51X7Y6M6XzL._AC_.jpg",
+info:"Maestro de Wing Chun y mentor de Bruce Lee. Representa disciplina, técnica refinada y combate elegante pero letal.",
+movies:"Ip Man Saga"
 },
 {
- name:"Rocky Balboa",
- category:"martial",
- img:"https://upload.wikimedia.org/wikipedia/en/1/18/Rocky_poster.jpg",
- info:"Boxeador legendario de Filadelfia.",
- movies:"Rocky Saga"
+name:"Rocky Balboa",
+category:"martial",
+img:"https://m.media-amazon.com/images/I/71vZJpXxH1L._AC_SY679_.jpg",
+info:"Boxeador de origen humilde que simboliza la perseverancia y el espíritu de superación frente a rivales aparentemente invencibles.",
+movies:"Rocky Saga"
 },
 {
- name:"Predator",
- category:"scifi",
- img:"https://upload.wikimedia.org/wikipedia/en/3/3c/Predator_Movie.jpg",
- info:"Cazador alienígena letal.",
- movies:"Predator 1-5"
+name:"Predator",
+category:"scifi",
+img:"https://m.media-amazon.com/images/I/51F6dS6mDML._AC_.jpg",
+info:"Cazador alienígena con tecnología avanzada, camuflaje y fuerza superior. Persigue a los guerreros más fuertes como trofeos.",
+movies:"Predator Saga"
 }
 ];
 
-let ratings = JSON.parse(localStorage.getItem("ratings")) || {};
-let filter = "all";
+let ratings=JSON.parse(localStorage.getItem("ratings"))||{};
+let filter="all";
+let searchText="";
 
 function renderHeroes(){
-    const container = document.getElementById("heroes");
-    container.innerHTML = "";
+const container=document.getElementById("heroes");
+container.innerHTML="";
 
-    let filtered = heroes.filter(h => 
-        filter==="all" || h.category===filter
-    );
+let filtered=heroes.filter(h=>
+(filter==="all"||h.category===filter)&&
+h.name.toLowerCase().includes(searchText.toLowerCase())
+);
 
-    filtered.sort((a,b)=>
-        (ratings[b.name]||0)-(ratings[a.name]||0)
-    );
+filtered.sort((a,b)=>(ratings[b.name]||0)-(ratings[a.name]||0));
 
-    filtered.forEach(hero=>{
-        const rating = ratings[hero.name] || 0;
-
-        container.innerHTML += `
-        <div class="card" onclick="openModal('${hero.name}')">
-            <img src="${hero.img}">
-            <h3>${hero.name}</h3>
-            <div class="stars" onclick="event.stopPropagation()">
-                ${[1,2,3,4,5].map(i=>`
-                    <span onclick="rateHero('${hero.name}',${i})"
-                    class="${i<=rating?'active':''}">★</span>
-                `).join("")}
-            </div>
-            <p>${rating}/5</p>
-        </div>
-        `;
-    });
+filtered.forEach(hero=>{
+const rating=ratings[hero.name]||0;
+container.innerHTML+=`
+<div class="card" onclick="openModal('${hero.name}')">
+<img src="${hero.img}">
+<h3>${hero.name}</h3>
+<div class="stars" onclick="event.stopPropagation()">
+${[1,2,3,4,5].map(i=>
+`<span onclick="rateHero('${hero.name}',${i})"
+class="${i<=rating?'active':''}">★</span>`
+).join("")}
+</div>
+<p>${rating}/5</p>
+</div>
+`;
+});
+renderTop10();
+renderSelects();
 }
 
 function rateHero(name,value){
-    ratings[name] = value;
-    localStorage.setItem("ratings", JSON.stringify(ratings));
-    renderHeroes();
+ratings[name]=value;
+localStorage.setItem("ratings",JSON.stringify(ratings));
+renderHeroes();
 }
 
 function setFilter(f){
-    filter = f;
-    document.querySelectorAll(".filters button")
-        .forEach(b=>b.classList.remove("active"));
-    event.target.classList.add("active");
-    renderHeroes();
+filter=f;
+document.querySelectorAll(".controls button")
+.forEach(b=>b.classList.remove("active"));
+event.target.classList.add("active");
+renderHeroes();
+}
+
+function searchHero(text){
+searchText=text;
+renderHeroes();
+}
+
+function renderTop10(){
+let sorted=[...heroes].sort((a,b)=>
+(ratings[b.name]||0)-(ratings[a.name]||0)
+).slice(0,10);
+
+document.getElementById("topList").innerHTML=
+sorted.map(h=>`<li>${h.name} - ${ratings[h.name]||0}/5</li>`).join("");
+}
+
+function renderSelects(){
+let selects=document.querySelectorAll("select");
+selects.forEach(s=>{
+s.innerHTML=heroes.map(h=>`<option>${h.name}</option>`).join("");
+});
+}
+
+function compareHeroes(){
+let h1=document.getElementById("hero1").value;
+let h2=document.getElementById("hero2").value;
+let r1=ratings[h1]||0;
+let r2=ratings[h2]||0;
+
+let result="";
+if(r1>r2) result=`🏆 ${h1} ganaría según la puntuación.`;
+else if(r2>r1) result=`🏆 ${h2} ganaría según la puntuación.`;
+else result="🤝 Empate técnico.";
+
+document.getElementById("vsResult").innerText=result;
 }
 
 function openModal(name){
-    const hero = heroes.find(h=>h.name===name);
-    document.getElementById("modalContent").innerHTML = `
-        <span class="close" onclick="closeModal()">✖</span>
-        <img src="${hero.img}">
-        <h2>${hero.name}</h2>
-        <p>${hero.info}</p>
-        <p><strong>Películas:</strong> ${hero.movies}</p>
-        <p><strong>Puntuación:</strong> ${ratings[name]||0}/5</p>
-    `;
-    document.getElementById("modal").style.display="flex";
+const hero=heroes.find(h=>h.name===name);
+document.getElementById("modalContent").innerHTML=`
+<span class="close" onclick="closeModal()">✖</span>
+<img src="${hero.img}">
+<h2>${hero.name}</h2>
+<p>${hero.info}</p>
+<p><strong>Películas:</strong> ${hero.movies}</p>
+<p><strong>Puntuación actual:</strong> ${ratings[name]||0}/5</p>
+`;
+document.getElementById("modal").style.display="flex";
 }
 
 function closeModal(){
-    document.getElementById("modal").style.display="none";
+document.getElementById("modal").style.display="none";
 }
 
 renderHeroes();
